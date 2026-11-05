@@ -1,0 +1,25 @@
+id = "right-full-join"
+level = 3
+order = 3
+
+[[exercise]]
+id = "right-1"
+hints = 2
+solution = ["SELECT d.name AS department, e.name AS employee FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;"]
+setup = [
+  { do = "seed", name = "company" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT d.name AS department, e.name AS employee FROM employees e RIGHT JOIN departments d ON d.id = e.department_id" },
+]
+
+[[exercise]]
+id = "full-1"
+hints = 2
+solution = ["SELECT e.name AS employee, d.name AS department FROM employees e FULL JOIN departments d ON d.id = e.department_id;"]
+setup = [
+  { do = "seed", name = "company" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT e.name AS employee, d.name AS department FROM employees e FULL JOIN departments d ON d.id = e.department_id" },
+]

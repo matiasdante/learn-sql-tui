@@ -1,0 +1,14 @@
+id = "user-version"
+level = 10
+order = 5
+
+[[exercise]]
+id = "userversion-1"
+hints = 2
+solution = ["PRAGMA user_version = 3;"]
+setup = [
+  { do = "sql", script = "CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT);" },
+]
+checks = [
+  { type = "pragma_equals", pragma = "user_version", value = "3" },
+]

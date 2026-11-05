@@ -1,0 +1,29 @@
+id = "alter-table"
+level = 6
+order = 5
+
+[[exercise]]
+id = "alter-1"
+hints = 2
+solution = ["ALTER TABLE tasks ADD COLUMN due_date TEXT;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "column", table = "tasks", name = "due_date", data_type = "TEXT" },
+  { type = "row_count", table = "tasks", count = 5 },
+]
+
+[[exercise]]
+id = "alter-2"
+hints = 2
+solution = ["ALTER TABLE tasks RENAME COLUMN title TO name;\nALTER TABLE tasks RENAME TO todos;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "table_exists", name = "todos" },
+  { type = "table_missing", name = "tasks" },
+  { type = "column", table = "todos", name = "name" },
+  { type = "row_count", table = "todos", count = 5 },
+]

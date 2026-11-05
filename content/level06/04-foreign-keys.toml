@@ -1,0 +1,17 @@
+id = "foreign-keys"
+level = 6
+order = 4
+
+[[exercise]]
+id = "fk-1"
+hints = 2
+solution = ["CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE, title TEXT);"]
+setup = [
+  { do = "sql", script = "CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT NOT NULL); INSERT INTO authors VALUES (1, 'Ada'), (2, 'Grace');" },
+]
+checks = [
+  { type = "table_exists", name = "posts" },
+  { type = "column", table = "posts", name = "author_id", notnull = true },
+  { type = "foreign_key", table = "posts", from = "author_id", ref_table = "authors", to = "id" },
+  { type = "foreign_key", table = "posts", from = "author_id", ref_table = "authors", on_delete = "CASCADE" },
+]

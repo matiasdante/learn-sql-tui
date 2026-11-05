@@ -1,0 +1,75 @@
+"transactions.title" = "BEGIN, COMMIT y ROLLBACK"
+"transactions.theory" = """
+Una transacción agrupa sentencias para que tengan éxito o fallen juntas. Mover dinero tiene que restar de una cuenta y sumar a la otra, nunca solo una de las dos:
+
+  BEGIN;
+  UPDATE accounts SET balance = balance - 30 WHERE id = 1;
+  UPDATE accounts SET balance = balance + 30 WHERE id = 2;
+  COMMIT;       -- lo hace permanente
+  -- o ROLLBACK;  -- descarta todo
+
+El prompt cambia a sql*> mientras hay una transacción abierta. Fuera de BEGIN, cada sentencia es su propia transacción y se confirma enseguida. Las transacciones dan las garantías ACID: todo o nada (Atomicidad), datos válidos (Consistencia), invisibles para otros hasta confirmar (Aislamiento) y conservados tras una caída (Durabilidad)."""
+"tx-1.prompt" = "Transferí 30 de Ada (cuenta 1) a Grace (cuenta 2) en una sola transacción: BEGIN, los dos UPDATE y COMMIT."
+"tx-1.hint1" = "No te olvides del COMMIT final: el prompt tiene que volver a sql> ."
+"tx-1.hint2" = "BEGIN;\nUPDATE accounts SET balance = balance - 30 WHERE id = 1;\nUPDATE accounts SET balance = balance + 30 WHERE id = 2;\nCOMMIT;"
+"tx-1.check1.fail" = "Los saldos deberían ser 70 para Ada y 80 para Grace."
+"tx-1.check2.fail" = "La transacción sigue abierta: terminala con COMMIT."
+"tx-1.check3.fail" = "Usá BEGIN ... COMMIT como se pidió."
+"tx-2.prompt" = "Empezá una transacción, poné todos los saldos en 0, date cuenta del error y deshacelo con ROLLBACK. Los saldos tienen que seguir en 100 y 50."
+"tx-2.hint1" = "BEGIN; UPDATE accounts SET balance = 0; y después ROLLBACK;"
+"tx-2.hint2" = "BEGIN;\nUPDATE accounts SET balance = 0;\nROLLBACK;"
+"tx-2.check1.fail" = "Los saldos tienen que haber vuelto a 100 y 50."
+"tx-2.check2.fail" = "La transacción sigue abierta."
+"tx-2.check3.fail" = "Usá ROLLBACK para deshacer el cambio."
+"savepoints.title" = "SAVEPOINT: rollback parcial"
+"savepoints.theory" = """
+Un savepoint es un marcador dentro de una transacción. Podés volver a él sin perder lo anterior:
+
+  BEGIN;
+  INSERT INTO log VALUES ('step 1');
+  SAVEPOINT sp1;
+  INSERT INTO log VALUES ('step 2');
+  ROLLBACK TO sp1;       -- el paso 2 se deshace, el paso 1 se conserva
+  COMMIT;                -- el paso 1 queda guardado
+
+RELEASE sp1 olvida el marcador pero conserva los cambios. Los savepoints se pueden anidar, y un SAVEPOINT fuera de una transacción inicia una."""
+"savepoint-1.prompt" = "La tabla log está vacía. En una transacción insertá 'first', creá un savepoint, insertá 'second', volvé al savepoint y hacé COMMIT. Solo 'first' tiene que quedar guardado."
+"savepoint-1.hint1" = "BEGIN; INSERT ...; SAVEPOINT sp; INSERT ...; ROLLBACK TO sp; COMMIT;"
+"savepoint-1.hint2" = "BEGIN;\nINSERT INTO log VALUES ('first');\nSAVEPOINT sp1;\nINSERT INTO log VALUES ('second');\nROLLBACK TO sp1;\nCOMMIT;"
+"savepoint-1.check1.fail" = "log debería contener solo 'first'."
+"savepoint-1.check2.fail" = "La transacción sigue abierta: terminala con COMMIT."
+"savepoint-1.check3.fail" = "Usá un SAVEPOINT como se pidió."
+"savepoint-1.check4.fail" = "Usá ROLLBACK TO al savepoint."
+"foreign-keys-pragma.title" = "PRAGMA foreign_keys"
+"foreign-keys-pragma.theory" = """
+Una clave foránea declarada en CREATE TABLE no hace nada hasta que activás su verificación, y la configuración es por conexión:
+
+  PRAGMA foreign_keys;          -- 0 = desactivado (lo normal en la shell de sqlite3)
+  PRAGMA foreign_keys = ON;
+
+Con ella en OFF podés insertar un pedido de un cliente que no existe, o borrar un padre y dejar huérfanos. Con ON, esas sentencias fallan con FOREIGN KEY constraint failed, y ON DELETE CASCADE / SET NULL empiezan a funcionar.
+
+Las aplicaciones reales ejecutan PRAGMA foreign_keys = ON cada vez que abren la base."""
+"fkpragma-1.prompt" = "Activá el control de claves foráneas en esta sesión y después borrá a la autora Ada. Sus posts tienen que desaparecer también (usan ON DELETE CASCADE)."
+"fkpragma-1.hint1" = "Primero PRAGMA foreign_keys = ON; y después DELETE FROM authors WHERE name = 'Ada';"
+"fkpragma-1.hint2" = "PRAGMA foreign_keys = ON;\nDELETE FROM authors WHERE name = 'Ada';"
+"fkpragma-1.check1.fail" = "Las claves foráneas siguen desactivadas en esta sesión."
+"fkpragma-1.check2.fail" = "Solo Ada debe borrarse de authors."
+"fkpragma-1.check3.fail" = "Los dos posts de Ada tienen que haber desaparecido y quedar solo el de Grace."
+"foreign-key-check.title" = "foreign_key_check: encontrar huérfanos"
+"foreign-key-check.theory" = """
+Si se escribieron datos mientras las claves foráneas estaban en OFF, algunas filas pueden apuntar a la nada. PRAGMA foreign_key_check lista cada violación (tabla, rowid, tabla padre, qué clave foránea):
+
+  PRAGMA foreign_key_check;
+
+Sin filas significa que la base es consistente. Al encontrar huérfanos decidís: borrarlos, corregir su valor o insertar el padre que falta. Una forma cómoda de borrarlos:
+
+  DELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));
+
+Ejecutalo antes de activar el control en una base vieja."""
+"fkcheck-1.prompt" = "La tabla posts tiene filas cuyo author_id apunta a un autor que no existe. Encontralas con PRAGMA foreign_key_check y borrá solo esos huérfanos."
+"fkcheck-1.hint1" = "DELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"
+"fkcheck-1.hint2" = "PRAGMA foreign_key_check;\nDELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"
+"fkcheck-1.check1.fail" = "Todavía quedan filas huérfanas."
+"fkcheck-1.check2.fail" = "Solo se deben borrar los huérfanos: quedan dos posts válidos."
+"fkcheck-1.check3.fail" = "Usá PRAGMA foreign_key_check para encontrar los huérfanos."

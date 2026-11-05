@@ -1,0 +1,16 @@
+id = "triggers"
+level = 9
+order = 2
+
+[[exercise]]
+id = "trigger-1"
+hints = 2
+solution = ["CREATE TRIGGER price_audit AFTER UPDATE OF price ON products BEGIN INSERT INTO price_log (product_id, old_price, new_price) VALUES (OLD.id, OLD.price, NEW.price); END;\nUPDATE products SET price = 1.5 WHERE id = 1;"]
+setup = [
+  { do = "sql", script = "CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, price REAL); CREATE TABLE price_log (product_id INTEGER, old_price REAL, new_price REAL); INSERT INTO products VALUES (1, 'Pen', 1.2), (2, 'Book', 10);" },
+]
+checks = [
+  { type = "trigger_exists", name = "price_audit", table = "products" },
+  { type = "query_equals", sql = "SELECT product_id, old_price, new_price FROM price_log", rows = [["1", "1.2", "1.5"]] },
+  { type = "query_equals", sql = "SELECT price FROM products WHERE id = 1", rows = [["1.5"]] },
+]

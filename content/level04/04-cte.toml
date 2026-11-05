@@ -1,0 +1,15 @@
+id = "cte"
+level = 4
+order = 4
+
+[[exercise]]
+id = "cte-1"
+hints = 2
+solution = ["WITH totals AS (SELECT oi.order_id, sum(oi.quantity * p.price) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY oi.order_id) SELECT order_id, total FROM totals WHERE total > 1000;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT oi.order_id, sum(oi.quantity * p.price) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY oi.order_id HAVING total > 1000" },
+  { type = "ran", any = ["WITH"] },
+]

@@ -1,0 +1,79 @@
+"attach.title" = "ATTACH：同时使用多个数据库文件"
+"attach.theory" = """
+一个 SQLite 数据库就是一个文件。ATTACH 会用一个名字打开另一个文件，之后就能在同一条语句里查询两个数据库：
+
+  ATTACH DATABASE 'archive.db' AS archive;
+  CREATE TABLE archive.old_orders AS SELECT * FROM orders WHERE status = 'shipped';
+  SELECT count(*) FROM archive.old_orders;
+  DETACH archive;
+
+主数据库的表可以不加前缀使用（main.orders）；附加的数据库需要加前缀（archive.old_orders）。如果文件不存在就会创建。用 PRAGMA database_list 可以查看已附加的数据库。
+
+在这个沙盒里，ATTACH 只能使用练习文件夹内的文件：无法打开或创建它之外的任何内容。"""
+"attach-1.prompt" = "附加一个新文件 archive.db，名称为 archive，并把状态为 shipped 的订单复制到新表 archive.shipped_orders（CREATE TABLE ... AS SELECT）。"
+"attach-1.hint1" = "ATTACH DATABASE 'archive.db' AS archive;，然后 CREATE TABLE archive.shipped_orders AS SELECT ..."
+"attach-1.hint2" = "ATTACH DATABASE 'archive.db' AS archive;\nCREATE TABLE archive.shipped_orders AS SELECT * FROM orders WHERE status = 'shipped';"
+"attach-1.check1.fail" = "数据库必须以 archive 这个名称附加。"
+"attach-1.check2.fail" = "archive.shipped_orders 必须包含 6 个 shipped 订单。"
+"attach-1.check3.fail" = "没有创建文件 archive.db。"
+"vacuum.title" = "VACUUM 与备份"
+"vacuum.theory" = """
+DELETE 删除行之后，文件并不会变小：释放出来的空间会在以后被重复使用。VACUUM 会重建整个文件，去掉这些空闲空间：
+
+  VACUUM;
+
+它不能在打开的事务中执行，并且需要临时空间来存放数据库的一份副本。相关的另一种形式把压缩后的结果写入新文件，原文件保持不变，这正好可以用来备份正在使用的数据库：
+
+  VACUUM INTO 'backup.db';
+
+其他工具：PRAGMA page_count 和 PRAGMA freelist_count 可以显示文件的页数以及空闲页数。"""
+"vacuum-1.prompt" = "把数据库压缩后备份到文件 backup.db。"
+"vacuum-1.hint1" = "VACUUM INTO 'backup.db';"
+"vacuum-1.hint2" = "VACUUM INTO 'backup.db';"
+"vacuum-1.check1.fail" = "文件 backup.db 还不存在。"
+"vacuum-1.check2.fail" = "请按要求使用 VACUUM INTO。"
+"integrity.title" = "integrity_check 与 quick_check"
+"integrity.theory" = """
+磁盘会出故障，文件也可能被截断。PRAGMA integrity_check 会读取整个数据库，检查其结构是否完好：
+
+  PRAGMA integrity_check;        -- 返回一行 ok，或者一份问题列表
+  PRAGMA quick_check;            -- 更快，会跳过一些检查
+  PRAGMA foreign_key_check;      -- 逻辑问题：孤儿行
+
+在崩溃之后、恢复数据前后，或者作为定时任务来运行它。如果报告了问题，就恢复最近一次完好的备份：手工修复很少值得。"""
+"integrity-1.prompt" = "用 PRAGMA integrity_check 检查数据库是否完好，结果必须是 ok。"
+"integrity-1.hint1" = "PRAGMA integrity_check;"
+"integrity-1.hint2" = "PRAGMA integrity_check;"
+"integrity-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"import-csv.title" = "导入 CSV 文件"
+"import-csv.theory" = """
+CSV 是通用的数据交换格式。.import 命令把文件加载到表中：
+
+  .import people.csv people              如果表 people 不存在就创建它，
+                                         列名取自第一行
+  .import --skip 1 temps.csv temps       表已存在：跳过表头行
+
+由 .import 创建的表只有 TEXT 列。想要真正的类型，请先用正确的列类型建好表，再使用 --skip 1：由于列的亲和性，SQLite 会把 '3.5' 转成 REAL。要查看一个文件里的内容，可以用 edit 命令创建它（edit people.csv），再用 .read 或 .import 读回来。"""
+"import-1.prompt" = "文件 people.csv（name,age,city）在练习文件夹中。把它导入到名为 people 的新表中，让 .import 根据表头行创建表。"
+"import-1.hint1" = ".import people.csv people"
+"import-1.hint2" = ".import people.csv people"
+"import-1.check1.fail" = "表 people 还不存在。"
+"import-1.check2.fail" = "people 中应当有文件里的 3 个人（不含表头）。"
+"import-1.check3.fail" = "列必须是 name、age 和 city。"
+"import-2.prompt" = "表 temperatures (day TEXT, celsius REAL) 已存在，文件 temps.csv 带有表头行。请导入其数据行，但不要导入表头。"
+"import-2.hint1" = ".import --skip 1 temps.csv temperatures"
+"import-2.hint2" = ".import --skip 1 temps.csv temperatures"
+"import-2.check1.fail" = "temperatures 中应当恰好有 3 行数据（不含表头）。"
+"import-2.check2.fail" = "这些值应当以 REAL 数值保存。"
+"user-version.title" = "user_version 与迁移"
+"user-version.theory" = """
+应用的表结构会随时间演变。SQLite 在文件头中留了一个空闲的整数，供你记录模式版本：
+
+  PRAGMA user_version;          -- 新数据库为 0
+  PRAGMA user_version = 3;
+
+典型的启动迁移流程：读取 user_version；如果是 1，就执行升到 2 的脚本并设置 user_version = 2；依此类推，直到最新版本。每一步都放在事务里，这样失败时数据库仍停留在一个已知的版本。文件头里其他有用的值：PRAGMA application_id、PRAGMA journal_mode（WAL 允许写入期间同时读取）和 PRAGMA page_size。"""
+"userversion-1.prompt" = "使用 PRAGMA user_version 把这个数据库标记为模式版本 3。"
+"userversion-1.hint1" = "PRAGMA user_version = 3;"
+"userversion-1.hint2" = "PRAGMA user_version = 3;"
+"userversion-1.check1.fail" = "user_version 还不是 3。"

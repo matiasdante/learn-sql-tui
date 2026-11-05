@@ -1,0 +1,29 @@
+id = "import-csv"
+level = 10
+order = 4
+
+[[exercise]]
+id = "import-1"
+hints = 2
+solution = [".import people.csv people"]
+setup = [
+  { do = "write", path = "people.csv", content = "name,age,city\nAda,36,London\nGrace,45,New York\n\"Hopper, Jr\",29,Boston\n" },
+]
+checks = [
+  { type = "table_exists", name = "people" },
+  { type = "row_count", table = "people", count = 3 },
+  { type = "query_equals", sql = "SELECT name FROM pragma_table_info('people') ORDER BY cid", rows = [["name"], ["age"], ["city"]] },
+]
+
+[[exercise]]
+id = "import-2"
+hints = 2
+solution = [".import --skip 1 temps.csv temperatures"]
+setup = [
+  { do = "sql", script = "CREATE TABLE temperatures (day TEXT, celsius REAL);" },
+  { do = "write", path = "temps.csv", content = "day,celsius\n2024-01-01,3.5\n2024-01-02,4\n2024-01-03,-1.25\n" },
+]
+checks = [
+  { type = "row_count", table = "temperatures", count = 3 },
+  { type = "query_equals", sql = "SELECT typeof(celsius) FROM temperatures LIMIT 1", rows = [["real"]] },
+]

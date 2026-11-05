@@ -1,0 +1,92 @@
+"inner-join.title" = "INNER JOIN：合并多张表"
+"inner-join.theory" = """
+相关的数据分布在不同的表里：订单只保存 customer_id。JOIN 通过条件把两张表的行匹配起来：
+
+  SELECT o.id, c.name
+  FROM orders AS o
+  JOIN customers AS c ON c.id = o.customer_id;
+
+JOIN 是 INNER JOIN 的简写：只有找到匹配的行才会出现。表别名（o、c）让语句更短，也能区分同名的列。继续串联 JOIN 就能引入更多表。"""
+"join-1.prompt" = "显示每个订单的 id（order_id）以及下单客户的姓名（customer）。"
+"join-1.hint1" = "orders.customer_id 指向 customers.id。"
+"join-1.hint2" = "SELECT o.id AS order_id, c.name AS customer FROM orders o JOIN customers c ON c.id = o.customer_id;"
+"join-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"join-2.prompt" = "对每个订单的每一行，显示客户姓名、商品名称和数量。"
+"join-2.hint1" = "从 order_items 出发，依次 JOIN orders、customers 和 products。"
+"join-2.hint2" = "SELECT c.name, p.name, oi.quantity FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN customers c ON c.id = o.customer_id JOIN products p ON p.id = oi.product_id;"
+"join-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"left-join.title" = "LEFT JOIN：保留没有匹配的行"
+"left-join.theory" = """
+INNER JOIN 会丢掉没有匹配的行。LEFT JOIN 保留左表的所有行，没有匹配时右侧用 NULL 填充：
+
+  SELECT c.name, o.id
+  FROM customers c
+  LEFT JOIN orders o ON o.customer_id = c.id;
+
+没有订单的客户会以 o.id = NULL 出现。由此得到一个经典写法，“找出没有关联行的记录”：
+
+  ... LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;
+
+用 count(o.id) 代替 count(*)，这样这些客户会被统计为 0。"""
+"left-1.prompt" = "显示每位客户的姓名和下过的订单数（列 n）。没有订单的客户也要出现，数量为 0。"
+"left-1.hint1" = "LEFT JOIN orders，按客户 GROUP BY，并统计 orders 的某一列（count(o.id)）。"
+"left-1.hint2" = "SELECT c.name, count(o.id) AS n FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id;"
+"left-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"left-2.prompt" = "显示从未下过订单的客户姓名。"
+"left-2.hint1" = "LEFT JOIN 之后，保留订单一侧为 NULL 的行。"
+"left-2.hint2" = "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;"
+"left-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"right-full-join.title" = "RIGHT JOIN 与 FULL JOIN"
+"right-full-join.theory" = """
+RIGHT JOIN 就是从另一侧看的 LEFT JOIN：保留右表的所有行。FULL JOIN 则保留两侧所有没有匹配的行：
+
+  SELECT e.name, d.name FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;
+  SELECT e.name, d.name FROM employees e FULL  JOIN departments d ON d.id = e.department_id;
+
+在公司数据里，Legal 没有员工，Jonas 没有部门。RIGHT JOIN 和 FULL JOIN 需要 SQLite 3.39 或更新版本，本程序已内置。很多人干脆交换两张表，改用 LEFT JOIN。"""
+"right-1.prompt" = "显示每个部门的名称（department）及其员工的姓名（employee）。Legal 没有员工，但必须出现，员工列为 NULL。"
+"right-1.hint1" = "可以从 employees 到 departments 用 RIGHT JOIN，或者从 departments 到 employees 用 LEFT JOIN。"
+"right-1.hint2" = "SELECT d.name AS department, e.name AS employee FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;"
+"right-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"full-1.prompt" = "显示每位员工（employee）及其所属部门（department）。没有部门的 Jonas 和没有员工的 Legal 都必须出现。"
+"full-1.hint1" = "FULL JOIN 会保留两张表中没有匹配的行。"
+"full-1.hint2" = "SELECT e.name AS employee, d.name AS department FROM employees e FULL JOIN departments d ON d.id = e.department_id;"
+"full-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"cross-join.title" = "CROSS JOIN：所有组合"
+"cross-join.theory" = """
+CROSS JOIN 不需要条件，把一张表的每一行与另一张表的每一行配对。3 种尺码 x 2 种颜色得到 6 行：
+
+  SELECT s.label, c.label FROM sizes s CROSS JOIN colors c;
+
+它适合生成组合（商品的各种款式、日历网格），但增长很快：1000 x 1000 行就是一百万行。忘记写 ON 条件的 JOIN 也会这样，所以一定要留意行数。"""
+"cross-1.prompt" = "表 sizes 和 colors 各有一列 label。显示尺码与颜色的所有组合（列名 size 和 color）。"
+"cross-1.hint1" = "不带任何 ON 条件的连接。"
+"cross-1.hint2" = "SELECT s.label AS size, c.label AS color FROM sizes s CROSS JOIN colors c;"
+"cross-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"self-join.title" = "自连接：表与自身连接"
+"self-join.theory" = """
+有时一张表会指向自己：employees.manager_id 保存的是另一位员工的 id。要读取两侧的数据，就用不同的别名把同一张表用两次：
+
+  SELECT e.name AS employee, m.name AS manager
+  FROM employees e
+  LEFT JOIN employees m ON m.id = e.manager_id;
+
+LEFT JOIN 会保留最高领导，他的 manager_id 是 NULL。"""
+"self-1.prompt" = "显示每位员工（employee）及其经理的姓名（manager）。Alice 没有经理，必须出现且经理为 NULL。"
+"self-1.hint1" = "把 employees 用两次（e 和 m），并用 m.id = e.manager_id 做 LEFT JOIN。"
+"self-1.hint2" = "SELECT e.name AS employee, m.name AS manager FROM employees e LEFT JOIN employees m ON m.id = e.manager_id;"
+"self-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"using.title" = "USING：更简短的连接"
+"using.theory" = """
+当连接列在两边同名时，USING 可以少写代码，而且这一列只显示一次：
+
+  SELECT b.title, a.name
+  FROM books b
+  JOIN authors a USING (author_id);
+
+它等价于 ON b.author_id = a.author_id。NATURAL JOIN 更进一步，按所有同名列连接，写起来更短但很脆弱：以后新增一列可能悄悄改变结果。建议使用 USING 或 ON。"""
+"using-1.prompt" = "表 books 和 authors 共有列 author_id。请用 USING 连接它们，显示每本书的标题及其作者姓名。"
+"using-1.hint1" = "JOIN authors USING (author_id)。"
+"using-1.hint2" = "SELECT b.title, a.name FROM books b JOIN authors a USING (author_id);"
+"using-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"using-1.check2.fail" = "请按要求使用 JOIN ... USING (author_id)。"

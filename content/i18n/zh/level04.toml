@@ -1,0 +1,111 @@
+"subqueries.title" = "子查询：查询中的查询"
+"subqueries.theory" = """
+子查询是放在括号里的 SELECT，可以当作一个值或一个列表使用。标量子查询返回单个值：
+
+  SELECT name, price FROM products
+  WHERE price > (SELECT avg(price) FROM products);
+
+返回一列的子查询可以交给 IN 使用：
+
+  SELECT name FROM customers
+  WHERE id IN (SELECT customer_id FROM orders);
+
+内层查询先执行，外层查询使用它的结果。"""
+"subq-1.prompt" = "显示价格高于所有商品平均价格的商品的名称和价格。"
+"subq-1.hint1" = "把 price 与 (SELECT avg(price) FROM products) 比较。"
+"subq-1.hint2" = "SELECT name, price FROM products WHERE price > (SELECT avg(price) FROM products);"
+"subq-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"subq-2.prompt" = "显示至少下过一个订单的客户姓名。"
+"subq-2.hint1" = "id IN (SELECT customer_id FROM orders)。"
+"subq-2.hint2" = "SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders);"
+"subq-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"exists-correlated.title" = "EXISTS 与相关子查询"
+"exists-correlated.theory" = """
+相关子查询会引用外层查询的列，因此每处理一行外层数据就执行一次。当子查询至少返回一行时，EXISTS 为真：
+
+  SELECT name FROM customers c
+  WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+用 EXISTS 时子查询选什么列无所谓（习惯写 SELECT 1）。相关性也可以用于取值：
+
+  SELECT name, price, category FROM products p
+  WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);
+
+NOT EXISTS 保留没有匹配的行；与 NOT IN 不同，子查询里含有 NULL 时它依然安全。"""
+"exists-1.prompt" = "使用 EXISTS，显示至少有一个 pending 状态订单的客户姓名。"
+"exists-1.hint1" = "子查询查找该客户 status = 'pending' 的订单。"
+"exists-1.hint2" = "SELECT name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id AND o.status = 'pending');"
+"exists-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"exists-1.check2.fail" = "请按要求使用 EXISTS。"
+"corr-1.prompt" = "显示价格高于其所在类别平均价格的商品的名称、类别和价格。"
+"corr-1.hint1" = "子查询对 category = p.category（外层当前行）的商品求平均。"
+"corr-1.hint2" = "SELECT name, category, price FROM products p WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);"
+"corr-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"set-operations.title" = "UNION、INTERSECT 和 EXCEPT"
+"set-operations.theory" = """
+集合运算用来合并两个列数相同的 SELECT 的结果：
+
+  UNION       两者的行，去重（UNION ALL 保留重复，速度更快）
+  INTERSECT   两者都有的行
+  EXCEPT      第一个结果里有、第二个结果里没有的行
+
+  SELECT id FROM customers
+  EXCEPT
+  SELECT customer_id FROM orders;       -- 没有订单的客户
+
+只允许有一个 ORDER BY，且必须放在最后。"""
+"union-1.prompt" = "显示一个列表，包含来自 UK 的客户姓名以及来自 Boston 的客户姓名。"
+"union-1.hint1" = "两个 SELECT 用 UNION 连接。"
+"union-1.hint2" = "SELECT name FROM customers WHERE country = 'UK' UNION SELECT name FROM customers WHERE city = 'Boston';"
+"union-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"union-1.check2.fail" = "请按要求使用 UNION。"
+"intersect-1.prompt" = "显示同时拥有 pending 订单和 shipped 订单的客户的 customer_id。"
+"intersect-1.hint1" = "每种状态一个 SELECT，用 INTERSECT 连接。"
+"intersect-1.hint2" = "SELECT customer_id FROM orders WHERE status = 'pending' INTERSECT SELECT customer_id FROM orders WHERE status = 'shipped';"
+"intersect-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"intersect-1.check2.fail" = "请按要求使用 INTERSECT。"
+"except-1.prompt" = "使用 EXCEPT，显示从未下过订单的客户的 id。"
+"except-1.hint1" = "所有客户 id 减去 orders 中的 customer_id。"
+"except-1.hint2" = "SELECT id FROM customers EXCEPT SELECT customer_id FROM orders;"
+"except-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"except-1.check2.fail" = "请按要求使用 EXCEPT。"
+"cte.title" = "WITH：公用表表达式"
+"cte.theory" = """
+CTE 给子查询起一个名字，让主查询可以自上而下地阅读：
+
+  WITH totals AS (
+    SELECT order_id, sum(quantity) AS items
+    FROM order_items
+    GROUP BY order_id
+  )
+  SELECT order_id, items FROM totals WHERE items > 5;
+
+可以把它看作只存活于一条语句的临时视图。可以定义多个，用逗号分隔，后面的可以使用前面的。"""
+"cte-1.prompt" = "用 WITH 子句计算每个订单的总额（数量乘以价格之和），并显示总额超过 1000 的订单，列名为 order_id 和 total。"
+"cte-1.hint1" = "在 CTE 中：order_items 与 products 做 JOIN 并按 order_id 分组；然后再过滤这个 CTE。"
+"cte-1.hint2" = "WITH totals AS (SELECT oi.order_id, sum(oi.quantity * p.price) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY oi.order_id) SELECT order_id, total FROM totals WHERE total > 1000;"
+"cte-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"cte-1.check2.fail" = "请按要求使用 WITH 子句。"
+"recursive-cte.title" = "递归 CTE"
+"recursive-cte.theory" = """
+递归 CTE 会调用自身：锚点查询给出最初的几行，递归部分不断根据上一轮的行产生新行，直到不再产生为止：
+
+  WITH RECURSIVE count(x) AS (
+    SELECT 1                        -- 锚点
+    UNION ALL
+    SELECT x + 1 FROM count         -- 递归部分
+    WHERE x < 5                     -- 终止条件
+  )
+  SELECT x FROM count;
+
+SQL 就是这样遍历层级结构（上司与员工、文件夹）和生成序列的。没有终止条件，查询永远不会结束：按 Ctrl+C 可以中断它。"""
+"rec-1.prompt" = "用递归 CTE 生成从 1 到 10 的数字（一列）。"
+"rec-1.hint1" = "锚点：SELECT 1。递归部分：x < 10 时产生 x + 1。"
+"rec-1.hint2" = "WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM n WHERE x < 10) SELECT x FROM n;"
+"rec-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"rec-1.check2.fail" = "请按要求使用 WITH RECURSIVE。"
+"rec-2.prompt" = "显示 Bruno 以及所有直接或间接向他汇报的人，并给出层级深度（name、depth）。Bruno 是深度 0，他的下属是 1，依此类推。"
+"rec-2.hint1" = "锚点：depth 为 0 的 Bruno。递归部分：manager_id 在 CTE 中的员工，depth + 1。"
+"rec-2.hint2" = "WITH RECURSIVE team(id, name, depth) AS (SELECT id, name, 0 FROM employees WHERE name = 'Bruno' UNION ALL SELECT e.id, e.name, t.depth + 1 FROM employees e JOIN team t ON e.manager_id = t.id) SELECT name, depth FROM team;"
+"rec-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"rec-2.check2.fail" = "请按要求使用 WITH RECURSIVE。"

@@ -1,0 +1,25 @@
+id = "text-functions"
+level = 2
+order = 1
+
+[[exercise]]
+id = "textfn-1"
+hints = 2
+solution = ["SELECT upper(name) AS upper_name, length(name) AS name_length FROM customers;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT upper(name) AS upper_name, length(name) AS name_length FROM customers" },
+]
+
+[[exercise]]
+id = "textfn-2"
+hints = 2
+solution = ["SELECT lower(substr(name, 1, 3)) AS code FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT lower(substr(name, 1, 3)) AS code FROM products" },
+]

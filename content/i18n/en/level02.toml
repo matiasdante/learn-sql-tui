@@ -1,0 +1,125 @@
+"text-functions.title" = "Text functions"
+"text-functions.theory" = """
+Functions transform a value inside the query. The most useful ones for text:
+
+  upper(x), lower(x)        change the case
+  length(x)                 number of characters
+  substr(x, start, len)     a piece of the text (the first character is position 1)
+  replace(x, old, new)      replaces every occurrence
+  trim(x)                   removes spaces at both ends
+
+  SELECT upper(name) AS shout, length(name) AS size FROM customers;"""
+"textfn-1.prompt" = "Show each customer name in uppercase (column upper_name) and how many characters it has (column name_length)."
+"textfn-1.hint1" = "Two functions: upper() and length()."
+"textfn-1.hint2" = "SELECT upper(name) AS upper_name, length(name) AS name_length FROM customers;"
+"textfn-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"textfn-2.prompt" = "Show the first 3 letters of each product name, in lowercase, as code."
+"textfn-2.hint1" = "substr(name, 1, 3) takes the first three characters; wrap it in lower()."
+"textfn-2.hint2" = "SELECT lower(substr(name, 1, 3)) AS code FROM products;"
+"textfn-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"number-functions.title" = "Number functions"
+"number-functions.theory" = """
+Numbers have their own functions:
+
+  round(x, n)        rounds to n decimals (round(x) rounds to a whole number)
+  abs(x)             removes the sign
+  max(a, b), min(a, b)   with two or more arguments they pick one value
+
+  SELECT name, round(price * 1.21, 1) AS with_tax FROM products;
+
+Division of two integers is an integer division: 7 / 2 is 3. Write 7 / 2.0 to get 3.5."""
+"numfn-1.prompt" = "Show each product name and its price plus 21% tax, rounded to 1 decimal, as price_with_tax."
+"numfn-1.hint1" = "Multiply by 1.21 and wrap the result in round(..., 1)."
+"numfn-1.hint2" = "SELECT name, round(price * 1.21, 1) AS price_with_tax FROM products;"
+"numfn-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"date-functions.title" = "Date functions"
+"date-functions.theory" = """
+SQLite has no date type: dates are text like 2024-03-15. The date functions work on that text:
+
+  date('2024-03-15', '+1 month')       2024-04-15
+  strftime('%Y-%m', '2024-03-15')       2024-03   (%Y year, %m month, %d day)
+  date('now')                           today
+
+  SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;
+
+Because ISO dates sort as text, WHERE ordered_at >= '2024-03-01' also works."""
+"datefn-1.prompt" = "Show the id of each order and the year and month of its date, like 2024-02, as month."
+"datefn-1.hint1" = "strftime('%Y-%m', ...) formats a date as year-month."
+"datefn-1.hint2" = "SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;"
+"datefn-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"datefn-2.prompt" = "Show the id and ordered_at of the orders placed in the 30 days before 2024-03-31 (from 30 days earlier, inclusive)."
+"datefn-2.hint1" = "date('2024-03-31', '-30 days') gives the starting date."
+"datefn-2.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at >= date('2024-03-31', '-30 days');"
+"datefn-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"aggregates.title" = "COUNT, SUM, AVG, MIN, MAX"
+"aggregates.theory" = """
+Aggregate functions collapse many rows into one value:
+
+  SELECT count(*) FROM orders;              rows
+  SELECT count(email) FROM customers;       rows where email is not NULL
+  SELECT count(DISTINCT country) FROM customers;
+  SELECT sum(stock), avg(price), min(price), max(price) FROM products;
+
+count(*) counts rows; count(column) skips NULLs. The other functions ignore NULLs too."""
+"agg-1.prompt" = "Show in one row how many customers there are (total) and how many of them have an email (with_email)."
+"agg-1.hint1" = "count(*) counts all rows, count(email) only the non-NULL ones."
+"agg-1.hint2" = "SELECT count(*) AS total, count(email) AS with_email FROM customers;"
+"agg-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"agg-2.prompt" = "Show the lowest price (min_price), the highest (max_price) and the average (avg_price) of the products."
+"agg-2.hint1" = "Three aggregates in one SELECT: min(), max() and avg()."
+"agg-2.hint2" = "SELECT min(price) AS min_price, max(price) AS max_price, avg(price) AS avg_price FROM products;"
+"agg-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"group-by.title" = "GROUP BY: one result per group"
+"group-by.theory" = """
+GROUP BY splits the rows into groups and the aggregates are computed once per group:
+
+  SELECT status, count(*) AS orders FROM orders GROUP BY status;
+  SELECT category, avg(price) AS avg_price FROM products GROUP BY category;
+
+Every column in the SELECT must be either in the GROUP BY or inside an aggregate. WHERE filters rows before they are grouped."""
+"group-1.prompt" = "Show each order status and how many orders have it (column n)."
+"group-1.hint1" = "Group by status and count the rows of each group."
+"group-1.hint2" = "SELECT status, count(*) AS n FROM orders GROUP BY status;"
+"group-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"group-2.prompt" = "Show each product category and the average price of its products (avg_price)."
+"group-2.hint1" = "GROUP BY category with avg(price)."
+"group-2.hint2" = "SELECT category, avg(price) AS avg_price FROM products GROUP BY category;"
+"group-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"having.title" = "HAVING: filtering groups"
+"having.theory" = """
+WHERE cannot use aggregates because it runs before the groups exist. To filter groups, use HAVING:
+
+  SELECT category, count(*) AS n
+  FROM products
+  GROUP BY category
+  HAVING count(*) > 2;
+
+The order is: FROM, WHERE (rows), GROUP BY, HAVING (groups), SELECT, ORDER BY, LIMIT."""
+"having-1.prompt" = "Show the categories that have more than 2 products, with the number of products (n)."
+"having-1.hint1" = "Group by category, then keep the groups with HAVING count(*) > 2."
+"having-1.hint2" = "SELECT category, count(*) AS n FROM products GROUP BY category HAVING count(*) > 2;"
+"having-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"having-2.prompt" = "In order_items, show each product_id with the total quantity sold (total), keeping only the products with a total above 5."
+"having-2.hint1" = "sum(quantity) per product, then HAVING on that sum."
+"having-2.hint2" = "SELECT product_id, sum(quantity) AS total FROM order_items GROUP BY product_id HAVING sum(quantity) > 5;"
+"having-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"coalesce-cast.title" = "COALESCE and CAST"
+"coalesce-cast.theory" = """
+coalesce(a, b, ...) returns the first value that is not NULL, which is the standard way to give a default:
+
+  SELECT name, coalesce(email, 'no email') AS contact FROM customers;
+
+CAST(x AS type) converts a value to INTEGER, REAL or TEXT:
+
+  SELECT CAST(price AS INTEGER) FROM products;     -- 3.5 becomes 3 (the decimals are cut)
+  SELECT CAST(42 AS TEXT) || ' items';
+
+Related: ifnull(a, b) is coalesce with two arguments and nullif(a, b) gives NULL when a = b."""
+"coalesce-1.prompt" = "Show each customer name and their email, or the text unknown when they have none (column contact)."
+"coalesce-1.hint1" = "coalesce(email, 'unknown') picks the first non-NULL value."
+"coalesce-1.hint2" = "SELECT name, coalesce(email, 'unknown') AS contact FROM customers;"
+"coalesce-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"cast-1.prompt" = "Show each product name and its price converted to an integer with CAST (column whole_price)."
+"cast-1.hint1" = "CAST(price AS INTEGER)."
+"cast-1.hint2" = "SELECT name, CAST(price AS INTEGER) AS whole_price FROM products;"
+"cast-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."

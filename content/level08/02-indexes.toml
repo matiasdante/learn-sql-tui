@@ -1,0 +1,26 @@
+id = "indexes"
+level = 8
+order = 2
+
+[[exercise]]
+id = "index-1"
+hints = 2
+solution = ["CREATE INDEX idx_orders_customer ON orders (customer_id);"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "index_exists", name = "idx_orders_customer", table = "orders" },
+  { type = "query_equals", sql = "SELECT count(*) FROM pragma_index_info('idx_orders_customer') WHERE name = 'customer_id'", rows = [["1"]] },
+]
+
+[[exercise]]
+id = "index-2"
+hints = 2
+solution = ["CREATE UNIQUE INDEX idx_customers_email ON customers (email);"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "index_exists", name = "idx_customers_email", table = "customers", unique = true },
+]

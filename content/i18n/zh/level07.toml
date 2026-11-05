@@ -1,0 +1,75 @@
+"transactions.title" = "BEGIN、COMMIT 和 ROLLBACK"
+"transactions.theory" = """
+事务把多条语句组合起来，要么一起成功，要么一起失败。转账必须从一个账户扣钱并给另一个账户加钱，绝不能只做其中一半：
+
+  BEGIN;
+  UPDATE accounts SET balance = balance - 30 WHERE id = 1;
+  UPDATE accounts SET balance = balance + 30 WHERE id = 2;
+  COMMIT;       -- 永久生效
+  -- 或 ROLLBACK;  -- 全部丢弃
+
+事务打开期间，提示符会变成 sql*>。在 BEGIN 之外，每条语句本身就是一个事务，并立即提交。事务提供 ACID 保证：要么全做要么全不做（原子性）、数据合法（一致性）、提交前对其他人不可见（隔离性）、崩溃后依然保留（持久性）。"""
+"tx-1.prompt" = "在一个事务里把 30 从 Ada（账户 1）转给 Grace（账户 2）：BEGIN、两条 UPDATE，然后 COMMIT。"
+"tx-1.hint1" = "别忘了最后的 COMMIT：提示符必须回到 sql> 。"
+"tx-1.hint2" = "BEGIN;\nUPDATE accounts SET balance = balance - 30 WHERE id = 1;\nUPDATE accounts SET balance = balance + 30 WHERE id = 2;\nCOMMIT;"
+"tx-1.check1.fail" = "余额应该是 Ada 70、Grace 80。"
+"tx-1.check2.fail" = "事务仍未结束：请用 COMMIT 结束它。"
+"tx-1.check3.fail" = "请按要求使用 BEGIN ... COMMIT。"
+"tx-2.prompt" = "开启一个事务，把所有余额设为 0，发现是个错误后用 ROLLBACK 撤销。余额必须仍是 100 和 50。"
+"tx-2.hint1" = "BEGIN; UPDATE accounts SET balance = 0; 然后 ROLLBACK;"
+"tx-2.hint2" = "BEGIN;\nUPDATE accounts SET balance = 0;\nROLLBACK;"
+"tx-2.check1.fail" = "余额必须恢复为 100 和 50。"
+"tx-2.check2.fail" = "事务仍然是打开的。"
+"tx-2.check3.fail" = "请使用 ROLLBACK 撤销修改。"
+"savepoints.title" = "SAVEPOINT：部分回滚"
+"savepoints.theory" = """
+保存点是事务内的书签。可以回滚到它，而不丢失在它之前的操作：
+
+  BEGIN;
+  INSERT INTO log VALUES ('step 1');
+  SAVEPOINT sp1;
+  INSERT INTO log VALUES ('step 2');
+  ROLLBACK TO sp1;       -- 撤销第 2 步，保留第 1 步
+  COMMIT;                -- 第 1 步被保存
+
+RELEASE sp1 会忘掉书签但保留修改。保存点可以嵌套，在事务之外执行 SAVEPOINT 会开启一个事务。"""
+"savepoint-1.prompt" = "表 log 是空的。在一个事务中插入 'first'，创建保存点，插入 'second'，回滚到保存点，然后 COMMIT。最终只有 'first' 被保存。"
+"savepoint-1.hint1" = "BEGIN; INSERT ...; SAVEPOINT sp; INSERT ...; ROLLBACK TO sp; COMMIT;"
+"savepoint-1.hint2" = "BEGIN;\nINSERT INTO log VALUES ('first');\nSAVEPOINT sp1;\nINSERT INTO log VALUES ('second');\nROLLBACK TO sp1;\nCOMMIT;"
+"savepoint-1.check1.fail" = "log 中应当只有 'first'。"
+"savepoint-1.check2.fail" = "事务仍未结束：请用 COMMIT 结束它。"
+"savepoint-1.check3.fail" = "请按要求使用 SAVEPOINT。"
+"savepoint-1.check4.fail" = "请使用 ROLLBACK TO 回滚到保存点。"
+"foreign-keys-pragma.title" = "PRAGMA foreign_keys"
+"foreign-keys-pragma.theory" = """
+在 CREATE TABLE 中声明的外键，在你开启检查之前不会起任何作用，而且这个设置是针对每个连接的：
+
+  PRAGMA foreign_keys;          -- 0 = 关闭（sqlite3 命令行里的默认值）
+  PRAGMA foreign_keys = ON;
+
+关闭时，你可以为不存在的客户插入订单，也可以删除父行而留下孤儿行。开启后，这些语句会报 FOREIGN KEY constraint failed，ON DELETE CASCADE / SET NULL 也会开始生效。
+
+真正的应用每次打开数据库时都会执行 PRAGMA foreign_keys = ON。"""
+"fkpragma-1.prompt" = "在本次会话中开启外键检查，然后删除作者 Ada。她的文章也必须一并消失（它们使用 ON DELETE CASCADE）。"
+"fkpragma-1.hint1" = "先执行 PRAGMA foreign_keys = ON;，再执行 DELETE FROM authors WHERE name = 'Ada';"
+"fkpragma-1.hint2" = "PRAGMA foreign_keys = ON;\nDELETE FROM authors WHERE name = 'Ada';"
+"fkpragma-1.check1.fail" = "本次会话中外键检查仍是关闭的。"
+"fkpragma-1.check2.fail" = "authors 中只应删除 Ada。"
+"fkpragma-1.check3.fail" = "Ada 的两篇文章必须消失，只剩 Grace 的一篇。"
+"foreign-key-check.title" = "foreign_key_check：查找孤儿行"
+"foreign-key-check.theory" = """
+如果在外键检查关闭时写入过数据，有些行可能指向了不存在的东西。PRAGMA foreign_key_check 会列出每一处违规（表、rowid、父表、对应的外键）：
+
+  PRAGMA foreign_key_check;
+
+没有返回行就说明数据库是一致的。发现孤儿行后由你决定：删除它们、修正它们的值，或者补上缺失的父行。一种方便的删除方法：
+
+  DELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));
+
+在旧数据库上开启检查之前，先运行它。"""
+"fkcheck-1.prompt" = "表 posts 中有些行的 author_id 指向不存在的作者。请用 PRAGMA foreign_key_check 找出它们，只删除这些孤儿行。"
+"fkcheck-1.hint1" = "DELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"
+"fkcheck-1.hint2" = "PRAGMA foreign_key_check;\nDELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"
+"fkcheck-1.check1.fail" = "仍然有孤儿行。"
+"fkcheck-1.check2.fail" = "只能删除孤儿行：应剩下两篇有效的文章。"
+"fkcheck-1.check3.fail" = "请使用 PRAGMA foreign_key_check 查找孤儿行。"

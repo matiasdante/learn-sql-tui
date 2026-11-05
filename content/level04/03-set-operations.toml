@@ -1,0 +1,39 @@
+id = "set-operations"
+level = 4
+order = 3
+
+[[exercise]]
+id = "union-1"
+hints = 2
+solution = ["SELECT name FROM customers WHERE country = 'UK' UNION SELECT name FROM customers WHERE city = 'Boston';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers WHERE country = 'UK' OR city = 'Boston'" },
+  { type = "ran", any = ["UNION"] },
+]
+
+[[exercise]]
+id = "intersect-1"
+hints = 2
+solution = ["SELECT customer_id FROM orders WHERE status = 'pending' INTERSECT SELECT customer_id FROM orders WHERE status = 'shipped';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT customer_id FROM orders WHERE status = 'pending' INTERSECT SELECT customer_id FROM orders WHERE status = 'shipped'" },
+  { type = "ran", any = ["INTERSECT"] },
+]
+
+[[exercise]]
+id = "except-1"
+hints = 2
+solution = ["SELECT id FROM customers EXCEPT SELECT customer_id FROM orders;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT id FROM customers EXCEPT SELECT customer_id FROM orders" },
+  { type = "ran", any = ["EXCEPT"] },
+]

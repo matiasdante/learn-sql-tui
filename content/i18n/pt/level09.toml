@@ -1,0 +1,79 @@
+"window-functions.title" = "Funções de janela"
+"window-functions.theory" = """
+Uma função de janela calcula sobre um conjunto de linhas relacionadas mas, ao contrário do GROUP BY, mantém todas as linhas. OVER (...) define a janela:
+
+  SELECT name, department_id, salary,
+         RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS pos
+  FROM employees;
+
+PARTITION BY separa as linhas em grupos (como GROUP BY) e ORDER BY ordena dentro de cada um. Funções úteis: ROW_NUMBER(), RANK() (empates compartilham a posição), DENSE_RANK(), LAG(x), LEAD(x) e qualquer agregação usada com OVER:
+
+  SUM(salary) OVER (ORDER BY hired_at)       -- total acumulado"""
+"win-1.prompt" = "Mostre name, department_id, salary e salary_rank dos funcionários que têm departamento. salary_rank é o RANK() do salário dentro do departamento, do maior para o menor salário."
+"win-1.hint1" = "RANK() OVER (PARTITION BY department_id ORDER BY salary DESC), e WHERE department_id IS NOT NULL."
+"win-1.hint2" = "SELECT name, department_id, salary, RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees WHERE department_id IS NOT NULL;"
+"win-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"win-2.prompt" = "Mostre name, hired_at e running_payroll: o total acumulado de salários na ordem de contratação (use o id para desempatar)."
+"win-2.hint1" = "SUM(salary) OVER (ORDER BY hired_at, id)."
+"win-2.hint2" = "SELECT name, hired_at, SUM(salary) OVER (ORDER BY hired_at, id) AS running_payroll FROM employees;"
+"win-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"triggers.title" = "Triggers"
+"triggers.theory" = """
+Um trigger executa SQL sozinho quando uma linha é inserida, atualizada ou apagada. Dentro dele, OLD é a linha antes e NEW a linha depois:
+
+  CREATE TRIGGER price_audit
+  AFTER UPDATE OF price ON products
+  BEGIN
+    INSERT INTO price_log (product_id, old_price, new_price)
+    VALUES (OLD.id, OLD.price, NEW.price);
+  END;
+
+Usos típicos: registros de auditoria, manter dados derivados atualizados e bloquear alterações com SELECT RAISE(ABORT, 'mensagem') dentro de um trigger BEFORE. Todo o CREATE TRIGGER é uma única instrução: o console espera o END; antes de executá-la. Remova com DROP TRIGGER."""
+"trigger-1.prompt" = "Crie um trigger price_audit que, depois que o preço de um produto mudar, insira seu id, preço antigo e preço novo em price_log. Depois mude o preço do produto 1 (Pen) para 1.5 para que o trigger o registre."
+"trigger-1.hint1" = "CREATE TRIGGER ... AFTER UPDATE OF price ON products BEGIN INSERT ... VALUES (OLD.id, OLD.price, NEW.price); END;"
+"trigger-1.hint2" = "CREATE TRIGGER price_audit AFTER UPDATE OF price ON products BEGIN INSERT INTO price_log (product_id, old_price, new_price) VALUES (OLD.id, OLD.price, NEW.price); END;\nUPDATE products SET price = 1.5 WHERE id = 1;"
+"trigger-1.check1.fail" = "O trigger price_audit sobre products ainda não existe."
+"trigger-1.check2.fail" = "price_log deveria ter uma linha: produto 1, de 1.2 para 1.5. Mude o preço depois de criar o trigger."
+"trigger-1.check3.fail" = "O preço do produto 1 precisa ser 1.5."
+"json.title" = "JSON no SQLite"
+"json.theory" = """
+O SQLite guarda JSON como texto e tem funções para lê-lo:
+
+  json_extract(payload, '$.user')        valor em um caminho
+  payload ->> '$.user'                   o mesmo, mais curto
+  json_array_length(payload, '$.tags')   tamanho de um array
+  json_each(payload, '$.tags')           uma linha por elemento (uma função que devolve tabela)
+  json_valid(x)                          é um JSON válido?
+
+  SELECT e.id, t.value
+  FROM events e, json_each(e.payload, '$.tags') AS t;
+
+Os caminhos começam com $; use .chave para objetos e [0] para posições de arrays. JSON é útil para dados soltos, mas colunas relacionais são melhores para o que você filtra e junta."""
+"json-1.prompt" = "A coluna payload de events guarda JSON. Mostre o id de cada evento e o user que está dentro do JSON (coluna user)."
+"json-1.hint1" = "json_extract(payload, '$.user') ou payload ->> '$.user'."
+"json-1.hint2" = "SELECT id, json_extract(payload, '$.user') AS user FROM events;"
+"json-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"json-2.prompt" = "Mostre uma linha para cada tag de cada evento: o id do evento (id) e a tag (tag). Os eventos sem tags não aparecem."
+"json-2.hint1" = "FROM events e, json_each(e.payload, '$.tags') AS t e selecione t.value."
+"json-2.hint2" = "SELECT e.id, t.value AS tag FROM events e, json_each(e.payload, '$.tags') AS t;"
+"json-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"fts5.title" = "Busca de texto completo com FTS5"
+"fts5.theory" = """
+LIKE '%palavra%' lê todas as linhas e não consegue ordenar por relevância. O FTS5 monta um índice de texto completo em uma tabela virtual:
+
+  CREATE VIRTUAL TABLE docs USING fts5(title, body);
+  INSERT INTO docs VALUES ('Joins', 'A join combines rows from two tables');
+  SELECT title FROM docs WHERE docs MATCH 'rows';
+  SELECT title FROM docs WHERE docs MATCH 'body:join OR title:index' ORDER BY rank;
+
+O MATCH entende palavras, AND / OR / NOT, "frases exatas", prefixos (data*) e filtros por coluna (title:sql). ORDER BY rank ordena por relevância. O FTS5 vem incluído no SQLite embutido neste programa."""
+"fts-1.prompt" = "Usando a busca de texto completo (MATCH), mostre o título dos documentos de docs que mencionam a palavra fast."
+"fts-1.hint1" = "WHERE docs MATCH 'fast' (o nome da tabela vai à esquerda de MATCH)."
+"fts-1.hint2" = "SELECT title FROM docs WHERE docs MATCH 'fast';"
+"fts-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"fts-1.check2.fail" = "Use MATCH como pedido."
+"fts-2.prompt" = "Crie uma tabela virtual FTS5 chamada notes com as colunas title e body, e insira duas notas nela."
+"fts-2.hint1" = "CREATE VIRTUAL TABLE notes USING fts5(title, body);"
+"fts-2.hint2" = "CREATE VIRTUAL TABLE notes USING fts5(title, body);\nINSERT INTO notes VALUES ('Shopping', 'milk and eggs'), ('Ideas', 'learn full-text search');"
+"fts-2.check1.fail" = "notes precisa ser uma tabela virtual USING fts5."
+"fts-2.check2.fail" = "notes deveria conter exatamente duas notas."

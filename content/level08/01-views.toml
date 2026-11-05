@@ -1,0 +1,15 @@
+id = "views"
+level = 8
+order = 1
+
+[[exercise]]
+id = "view-1"
+hints = 2
+solution = ["CREATE VIEW customer_orders AS SELECT c.name AS name, count(o.id) AS orders FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "view_exists", name = "customer_orders" },
+  { type = "query_equals", sql = "SELECT name, orders FROM customer_orders ORDER BY name", rows = [["Ada Lovelace", "3"], ["Alan Turing", "0"], ["Barbara Liskov", "1"], ["Dennis Ritchie", "0"], ["Grace Hopper", "2"], ["Linus Torvalds", "1"], ["Margaret Hamilton", "2"], ["Marie Curie", "0"], ["Tim Berners-Lee", "1"]] },
+]

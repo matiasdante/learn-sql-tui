@@ -1,0 +1,27 @@
+id = "update"
+level = 5
+order = 2
+
+[[exercise]]
+id = "update-1"
+hints = 2
+solution = ["UPDATE tasks SET done = 1 WHERE title = 'Pay rent';"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT done FROM tasks WHERE title = 'Pay rent'", rows = [["1"]] },
+  { type = "row_count", table = "tasks", count = 3, filter = "done = 1" },
+]
+
+[[exercise]]
+id = "update-2"
+hints = 2
+solution = ["UPDATE tasks SET priority = 1 WHERE done = 0;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "row_count", table = "tasks", count = 3, filter = "done = 0 AND priority = 1" },
+  { type = "query_equals", sql = "SELECT id, priority FROM tasks WHERE done = 1 ORDER BY id", rows = [["3", "3"], ["5", "2"]] },
+]

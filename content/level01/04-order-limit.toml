@@ -1,0 +1,25 @@
+id = "order-limit"
+level = 1
+order = 4
+
+[[exercise]]
+id = "orderlimit-1"
+hints = 2
+solution = ["SELECT name, price FROM products ORDER BY price DESC LIMIT 3;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, price FROM products ORDER BY price DESC LIMIT 3", ordered = true },
+]
+
+[[exercise]]
+id = "orderlimit-2"
+hints = 2
+solution = ["SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 2;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 2", ordered = true },
+]

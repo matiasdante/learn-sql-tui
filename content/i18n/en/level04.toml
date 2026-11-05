@@ -1,0 +1,111 @@
+"subqueries.title" = "Subqueries: a query inside a query"
+"subqueries.theory" = """
+A subquery is a SELECT in parentheses used as a value or as a list. A scalar subquery returns one value:
+
+  SELECT name, price FROM products
+  WHERE price > (SELECT avg(price) FROM products);
+
+A subquery that returns one column can feed IN:
+
+  SELECT name FROM customers
+  WHERE id IN (SELECT customer_id FROM orders);
+
+The inner query runs first; the outer one uses its result."""
+"subq-1.prompt" = "Show the name and price of the products that cost more than the average price of all products."
+"subq-1.hint1" = "Compare price with (SELECT avg(price) FROM products)."
+"subq-1.hint2" = "SELECT name, price FROM products WHERE price > (SELECT avg(price) FROM products);"
+"subq-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"subq-2.prompt" = "Show the name of the customers who have placed at least one order."
+"subq-2.hint1" = "id IN (SELECT customer_id FROM orders)."
+"subq-2.hint2" = "SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders);"
+"subq-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"exists-correlated.title" = "EXISTS and correlated subqueries"
+"exists-correlated.theory" = """
+A correlated subquery mentions a column of the outer query, so it runs once per outer row. EXISTS is true when the subquery returns at least one row:
+
+  SELECT name FROM customers c
+  WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+What the subquery selects does not matter with EXISTS (SELECT 1 is the habit). Correlation also works for values:
+
+  SELECT name, price, category FROM products p
+  WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);
+
+NOT EXISTS keeps the rows with no match, and unlike NOT IN it is safe when the subquery contains NULLs."""
+"exists-1.prompt" = "Using EXISTS, show the name of the customers who have at least one pending order."
+"exists-1.hint1" = "The subquery looks for orders of that customer with status = 'pending'."
+"exists-1.hint2" = "SELECT name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id AND o.status = 'pending');"
+"exists-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"exists-1.check2.fail" = "Use EXISTS as asked."
+"corr-1.prompt" = "Show the name, category and price of the products that cost more than the average price of their own category."
+"corr-1.hint1" = "The subquery averages the products with category = p.category (the outer row)."
+"corr-1.hint2" = "SELECT name, category, price FROM products p WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);"
+"corr-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"set-operations.title" = "UNION, INTERSECT and EXCEPT"
+"set-operations.theory" = """
+Set operations combine the results of two SELECTs that have the same number of columns:
+
+  UNION       rows from both, without duplicates (UNION ALL keeps duplicates and is faster)
+  INTERSECT   rows that appear in both
+  EXCEPT      rows of the first that are not in the second
+
+  SELECT id FROM customers
+  EXCEPT
+  SELECT customer_id FROM orders;       -- customers with no orders
+
+Only one ORDER BY is allowed, at the very end."""
+"union-1.prompt" = "Show one list with the names of the customers from the UK together with the names of the customers from Boston."
+"union-1.hint1" = "Two SELECTs joined by UNION."
+"union-1.hint2" = "SELECT name FROM customers WHERE country = 'UK' UNION SELECT name FROM customers WHERE city = 'Boston';"
+"union-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"union-1.check2.fail" = "Use UNION as asked."
+"intersect-1.prompt" = "Show the customer_id of the customers who have both a pending order and a shipped order."
+"intersect-1.hint1" = "One SELECT per status, joined by INTERSECT."
+"intersect-1.hint2" = "SELECT customer_id FROM orders WHERE status = 'pending' INTERSECT SELECT customer_id FROM orders WHERE status = 'shipped';"
+"intersect-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"intersect-1.check2.fail" = "Use INTERSECT as asked."
+"except-1.prompt" = "Show the id of the customers who have never placed an order, using EXCEPT."
+"except-1.hint1" = "All customer ids EXCEPT the customer_id values of orders."
+"except-1.hint2" = "SELECT id FROM customers EXCEPT SELECT customer_id FROM orders;"
+"except-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"except-1.check2.fail" = "Use EXCEPT as asked."
+"cte.title" = "WITH: common table expressions"
+"cte.theory" = """
+A CTE gives a name to a subquery so the main query reads top to bottom:
+
+  WITH totals AS (
+    SELECT order_id, sum(quantity) AS items
+    FROM order_items
+    GROUP BY order_id
+  )
+  SELECT order_id, items FROM totals WHERE items > 5;
+
+Think of it as a temporary view that lives for one statement. You can define several, separated by commas, and later ones can use earlier ones."""
+"cte-1.prompt" = "Use a WITH clause to compute the total of each order (sum of quantity times price) and show the orders whose total is above 1000, as order_id and total."
+"cte-1.hint1" = "In the CTE: JOIN order_items with products and GROUP BY order_id. Then filter the CTE."
+"cte-1.hint2" = "WITH totals AS (SELECT oi.order_id, sum(oi.quantity * p.price) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY oi.order_id) SELECT order_id, total FROM totals WHERE total > 1000;"
+"cte-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"cte-1.check2.fail" = "Use a WITH clause as asked."
+"recursive-cte.title" = "Recursive CTEs"
+"recursive-cte.theory" = """
+A recursive CTE calls itself: an anchor query gives the first rows, and a recursive part keeps producing new rows from the previous ones, until it produces none:
+
+  WITH RECURSIVE count(x) AS (
+    SELECT 1                        -- anchor
+    UNION ALL
+    SELECT x + 1 FROM count         -- recursive part
+    WHERE x < 5                     -- the brake
+  )
+  SELECT x FROM count;
+
+It is how SQL walks hierarchies (bosses and employees, folders) and builds series. Without the brake the query never ends: press Ctrl+C to stop it."""
+"rec-1.prompt" = "With a recursive CTE, generate the numbers from 1 to 10 (one column)."
+"rec-1.hint1" = "Anchor: SELECT 1. Recursive part: x + 1 while x < 10."
+"rec-1.hint2" = "WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM n WHERE x < 10) SELECT x FROM n;"
+"rec-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"rec-1.check2.fail" = "Use WITH RECURSIVE as asked."
+"rec-2.prompt" = "Show Bruno and everyone who reports to him, directly or not, with their depth (name, depth). Bruno is depth 0, his reports depth 1, and so on."
+"rec-2.hint1" = "Anchor: Bruno with depth 0. Recursive part: employees whose manager_id is in the CTE, depth + 1."
+"rec-2.hint2" = "WITH RECURSIVE team(id, name, depth) AS (SELECT id, name, 0 FROM employees WHERE name = 'Bruno' UNION ALL SELECT e.id, e.name, t.depth + 1 FROM employees e JOIN team t ON e.manager_id = t.id) SELECT name, depth FROM team;"
+"rec-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"rec-2.check2.fail" = "Use WITH RECURSIVE as asked."

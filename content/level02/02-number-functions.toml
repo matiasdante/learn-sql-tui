@@ -1,0 +1,14 @@
+id = "number-functions"
+level = 2
+order = 2
+
+[[exercise]]
+id = "numfn-1"
+hints = 2
+solution = ["SELECT name, round(price * 1.21, 1) AS price_with_tax FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, round(price * 1.21, 1) AS price_with_tax FROM products" },
+]

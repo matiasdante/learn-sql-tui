@@ -1,0 +1,15 @@
+id = "using"
+level = 3
+order = 6
+
+[[exercise]]
+id = "using-1"
+hints = 2
+solution = ["SELECT b.title, a.name FROM books b JOIN authors a USING (author_id);"]
+setup = [
+  { do = "sql", script = "CREATE TABLE authors (author_id INTEGER PRIMARY KEY, name TEXT); CREATE TABLE books (book_id INTEGER PRIMARY KEY, title TEXT, author_id INTEGER); INSERT INTO authors VALUES (1, 'Ursula K. Le Guin'), (2, 'Stanislaw Lem'); INSERT INTO books VALUES (1, 'The Dispossessed', 1), (2, 'Solaris', 2), (3, 'The Left Hand of Darkness', 1);" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT b.title, a.name FROM books b JOIN authors a ON a.author_id = b.author_id" },
+  { type = "ran", any = ["USING"] },
+]

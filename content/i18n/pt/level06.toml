@@ -1,0 +1,153 @@
+"create-table.title" = "CREATE TABLE"
+"create-table.theory" = """
+CREATE TABLE define uma tabela: um nome e depois cada coluna com seu tipo e restrições:
+
+  CREATE TABLE books (
+    id    INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    year  INTEGER
+  );
+
+PRIMARY KEY identifica cada linha (um INTEGER PRIMARY KEY se preenche sozinho com 1, 2, 3...). NOT NULL proíbe valores ausentes. DEFAULT dá um valor quando o INSERT omite a coluna. CHECK rejeita valores que quebram uma regra:
+
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned'))
+
+Use .schema books para ver como uma tabela foi criada."""
+"create-1.prompt" = "Crie uma tabela books com: id (INTEGER, chave primária), title (TEXT, obrigatório) e year (INTEGER)."
+"create-1.hint1" = "Obrigatório significa NOT NULL."
+"create-1.hint2" = "CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, year INTEGER);"
+"create-1.check1.fail" = "A tabela books ainda não existe."
+"create-1.check2.fail" = "books.id precisa ser um INTEGER PRIMARY KEY."
+"create-1.check3.fail" = "books.title precisa ser TEXT NOT NULL."
+"create-1.check4.fail" = "books.year precisa ser uma coluna INTEGER."
+"create-2.prompt" = "Crie uma tabela members com: name (TEXT, obrigatório), status (TEXT, obrigatório, padrão 'active', e só 'active' ou 'banned' permitidos com um CHECK) e points (INTEGER, padrão 0)."
+"create-2.hint1" = "status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned'))."
+"create-2.hint2" = "CREATE TABLE members (name TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned')), points INTEGER DEFAULT 0);"
+"create-2.check1.fail" = "A tabela members ainda não existe."
+"create-2.check2.fail" = "members.name precisa ser NOT NULL."
+"create-2.check3.fail" = "members.status precisa de DEFAULT 'active'."
+"create-2.check4.fail" = "members.status precisa ser NOT NULL."
+"create-2.check5.fail" = "members.points precisa de DEFAULT 0."
+"create-2.check6.fail" = "Adicione um CHECK para o status."
+"types-strict.title" = "Tipos e tabelas STRICT"
+"types-strict.theory" = """
+O SQLite é flexível com os tipos: uma coluna tem uma afinidade (um tipo preferido), não uma regra. Você pode guardar o texto 'hello' em uma coluna INTEGER e ele aceita. As classes de armazenamento são NULL, INTEGER, REAL, TEXT e BLOB; typeof(x) diz qual um valor tem.
+
+Para ter verificação estrita como em outros bancos, adicione STRICT depois do parêntese de fechamento:
+
+  CREATE TABLE readings (
+    sensor TEXT,
+    value  REAL
+  ) STRICT;
+
+Uma tabela STRICT aceita só INT, INTEGER, REAL, TEXT, BLOB e ANY como tipos de coluna, e rejeita valores que não encaixam. Experimente: INSERT INTO readings VALUES ('a', 'not a number'); falha."""
+"strict-1.prompt" = "Crie uma tabela STRICT readings com uma coluna TEXT sensor e uma coluna REAL value."
+"strict-1.hint1" = "A palavra STRICT vai depois do parêntese de fechamento."
+"strict-1.hint2" = "CREATE TABLE readings (sensor TEXT, value REAL) STRICT;"
+"strict-1.check1.fail" = "A tabela readings ainda não existe."
+"strict-1.check2.fail" = "readings.sensor precisa ser TEXT."
+"strict-1.check3.fail" = "readings.value precisa ser REAL."
+"strict-1.check4.fail" = "A tabela precisa ser declarada STRICT."
+"constraints.title" = "Restrições: UNIQUE, NOT NULL, CHECK"
+"constraints.theory" = """
+As restrições fazem o banco recusar dados ruins, não importa qual programa escreva nele:
+
+  NOT NULL    o valor é obrigatório
+  UNIQUE      duas linhas não podem repetir o valor (um índice único é criado para isso)
+  CHECK(...)  a condição deve ser verdadeira
+  PRIMARY KEY único e identifica a linha
+
+  CREATE TABLE users (
+    id    INTEGER PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    age   INTEGER CHECK (age >= 0)
+  );
+
+Um INSERT ou UPDATE que as viole falha com um erro como UNIQUE constraint failed: users.email, e nada é escrito. As regras aplicadas aqui protegem os dados diante de todas as aplicações."""
+"constraints-1.prompt" = "Crie uma tabela users com: id (INTEGER chave primária), email (TEXT, obrigatório e único) e age (INTEGER, só 0 ou mais permitido com um CHECK)."
+"constraints-1.hint1" = "email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0)."
+"constraints-1.hint2" = "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0));"
+"constraints-1.check1.fail" = "A tabela users ainda não existe."
+"constraints-1.check2.fail" = "users.id precisa ser a chave primária."
+"constraints-1.check3.fail" = "users.email precisa ser NOT NULL."
+"constraints-1.check4.fail" = "users.email precisa ser UNIQUE."
+"constraints-1.check5.fail" = "Adicione um CHECK sobre age."
+"foreign-keys.title" = "Chaves estrangeiras e ON DELETE"
+"foreign-keys.theory" = """
+Uma chave estrangeira faz uma coluna apontar para a chave primária de outra tabela, assim não pode haver um post cujo autor não existe:
+
+  CREATE TABLE posts (
+    id        INTEGER PRIMARY KEY,
+    author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
+    title     TEXT
+  );
+
+ON DELETE diz o que acontece quando a linha pai é apagada:
+  NO ACTION / RESTRICT   recusa a exclusão (padrão)
+  CASCADE                apaga também os filhos
+  SET NULL               coloca a coluna filha em NULL
+  SET DEFAULT            coloca no valor padrão
+
+Importante: o SQLite só aplica as chaves estrangeiras quando PRAGMA foreign_keys = ON (nível 7)."""
+"fk-1.prompt" = "A tabela authors já existe. Crie uma tabela posts com id (INTEGER chave primária), author_id (INTEGER, obrigatório, referenciando authors(id) de modo que apagar um autor apague seus posts) e title (TEXT)."
+"fk-1.hint1" = "author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE."
+"fk-1.hint2" = "CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE, title TEXT);"
+"fk-1.check1.fail" = "A tabela posts ainda não existe."
+"fk-1.check2.fail" = "posts.author_id precisa ser NOT NULL."
+"fk-1.check3.fail" = "posts.author_id precisa referenciar authors(id)."
+"fk-1.check4.fail" = "Adicione ON DELETE CASCADE à chave estrangeira."
+"alter-table.title" = "ALTER TABLE"
+"alter-table.theory" = """
+ALTER TABLE altera uma tabela que já tem dados:
+
+  ALTER TABLE tasks ADD COLUMN due_date TEXT;          coluna nova (as linhas existentes recebem NULL)
+  ALTER TABLE tasks RENAME COLUMN title TO name;
+  ALTER TABLE tasks RENAME TO todos;
+  ALTER TABLE tasks DROP COLUMN priority;
+
+ADD COLUMN tem limites: uma coluna nova NOT NULL precisa de um DEFAULT, e não pode ser PRIMARY KEY nem UNIQUE. Para mudanças maiores, crie a tabela nova, copie os dados com INSERT ... SELECT, apague a velha e renomeie a nova."""
+"alter-1.prompt" = "Adicione uma coluna TEXT chamada due_date à tabela tasks. Mantenha suas 5 linhas."
+"alter-1.hint1" = "ALTER TABLE tasks ADD COLUMN ..."
+"alter-1.hint2" = "ALTER TABLE tasks ADD COLUMN due_date TEXT;"
+"alter-1.check1.fail" = "tasks precisa de uma coluna TEXT chamada due_date."
+"alter-1.check2.fail" = "As 5 linhas originais devem permanecer."
+"alter-2.prompt" = "Renomeie a coluna title de tasks para name e depois renomeie a tabela tasks para todos."
+"alter-2.hint1" = "Duas instruções: RENAME COLUMN ... TO ... e depois RENAME TO ..."
+"alter-2.hint2" = "ALTER TABLE tasks RENAME COLUMN title TO name;\nALTER TABLE tasks RENAME TO todos;"
+"alter-2.check1.fail" = "A tabela precisa se chamar todos."
+"alter-2.check2.fail" = "O nome antigo tasks não deve mais existir."
+"alter-2.check3.fail" = "A coluna precisa se chamar name."
+"alter-2.check4.fail" = "As 5 linhas devem ser mantidas."
+"drop.title" = "DROP: eliminar tabelas"
+"drop.theory" = """
+DROP TABLE remove uma tabela junto com todas as suas linhas, índices e triggers:
+
+  DROP TABLE counters;
+  DROP TABLE IF EXISTS counters;     -- sem erro se ela já não existe
+
+Também existem DROP VIEW, DROP INDEX e DROP TRIGGER. Não há desfazer (a não ser uma transação ainda não confirmada, ou um backup). Se outras tabelas a referenciam com chaves estrangeiras e PRAGMA foreign_keys está ON, o SQLite verifica que a exclusão não deixe órfãos."""
+"drop-1.prompt" = "Elimine por completo a tabela counters. A tabela tasks deve permanecer."
+"drop-1.hint1" = "DROP TABLE counters;"
+"drop-1.hint2" = "DROP TABLE counters;"
+"drop-1.check1.fail" = "A tabela counters ainda existe."
+"drop-1.check2.fail" = "Não apague tasks."
+"generated-columns.title" = "Colunas geradas"
+"generated-columns.theory" = """
+Uma coluna gerada é calculada a partir de outras colunas da mesma linha, então nunca fica dessincronizada:
+
+  CREATE TABLE items (
+    price REAL,
+    qty   INTEGER,
+    total REAL GENERATED ALWAYS AS (price * qty) VIRTUAL
+  );
+
+As colunas VIRTUAL são calculadas na leitura; as STORED são gravadas em disco quando a linha é escrita (e podem ser indexadas). Não é possível fazer INSERT em uma coluna gerada. ALTER TABLE ... ADD COLUMN pode adicionar as VIRTUAL:
+
+  ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);
+
+As colunas geradas nem sempre aparecem com SELECT *; peça-as pelo nome."""
+"generated-1.prompt" = "A tabela items tem price e qty. Adicione uma coluna gerada total que seja sempre igual a price * qty."
+"generated-1.hint1" = "ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"
+"generated-1.hint2" = "ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"
+"generated-1.check1.fail" = "items precisa de uma coluna gerada chamada total."
+"generated-1.check2.fail" = "total precisa ser igual a price * qty em cada linha."

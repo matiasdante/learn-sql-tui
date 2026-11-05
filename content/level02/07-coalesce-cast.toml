@@ -1,0 +1,25 @@
+id = "coalesce-cast"
+level = 2
+order = 7
+
+[[exercise]]
+id = "coalesce-1"
+hints = 2
+solution = ["SELECT name, coalesce(email, 'unknown') AS contact FROM customers;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, coalesce(email, 'unknown') AS contact FROM customers" },
+]
+
+[[exercise]]
+id = "cast-1"
+hints = 2
+solution = ["SELECT name, CAST(price AS INTEGER) AS whole_price FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, CAST(price AS INTEGER) AS whole_price FROM products" },
+]

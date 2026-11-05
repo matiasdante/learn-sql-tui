@@ -1,0 +1,86 @@
+"views.title" = "Vistas: consultas guardadas"
+"views.theory" = """
+Una vista es un SELECT con nombre. No guarda datos: cada vez que consultás la vista, el SELECT se ejecuta sobre las tablas actuales.
+
+  CREATE VIEW pending_orders AS
+    SELECT o.id, c.name
+    FROM orders o JOIN customers c ON c.id = o.customer_id
+    WHERE o.status = 'pending';
+
+  SELECT * FROM pending_orders;
+
+Las vistas esconden complejidad (joins largos), le dan un nombre estable a un cálculo y permiten exponer solo algunas columnas. Se borran con DROP VIEW. Los nombres de columna se eligen con CREATE VIEW v (a, b) AS ... o con alias en el SELECT."""
+"view-1.prompt" = "Creá una vista llamada customer_orders con el nombre de cada cliente y la cantidad de pedidos que hizo, en las columnas name y orders. Los clientes sin pedidos tienen que mostrar 0."
+"view-1.hint1" = "CREATE VIEW customer_orders AS SELECT ... LEFT JOIN ... GROUP BY ..."
+"view-1.hint2" = "CREATE VIEW customer_orders AS SELECT c.name AS name, count(o.id) AS orders FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id;"
+"view-1.check1.fail" = "La vista customer_orders todavía no existe."
+"view-1.check2.fail" = "La vista tiene que devolver name y orders de los 9 clientes (0 para los que no tienen pedidos)."
+"indexes.title" = "Índices"
+"indexes.theory" = """
+Un índice es una copia ordenada de una o más columnas que permite encontrar filas sin leer toda la tabla, como el índice de un libro:
+
+  CREATE INDEX idx_orders_customer ON orders (customer_id);
+  CREATE UNIQUE INDEX idx_customers_email ON customers (email);
+
+Las consultas que filtran o unen por columnas indexadas se vuelven mucho más rápidas. El costo: el índice ocupa espacio y cada INSERT, UPDATE y DELETE tiene que mantenerlo al día. Por eso se indexan las columnas por las que se busca, no todo. PRIMARY KEY y UNIQUE crean sus propios índices. DROP INDEX borra uno; .indexes los lista."""
+"index-1.prompt" = "Creá un índice llamado idx_orders_customer sobre la columna customer_id de orders."
+"index-1.hint1" = "CREATE INDEX nombre ON tabla (columna);"
+"index-1.hint2" = "CREATE INDEX idx_orders_customer ON orders (customer_id);"
+"index-1.check1.fail" = "El índice idx_orders_customer sobre orders todavía no existe."
+"index-1.check2.fail" = "El índice tiene que ser sobre la columna customer_id."
+"index-2.prompt" = "Creá un índice UNIQUE llamado idx_customers_email sobre la columna email de customers, para que dos clientes no puedan compartir un email."
+"index-2.hint1" = "CREATE UNIQUE INDEX ..."
+"index-2.hint2" = "CREATE UNIQUE INDEX idx_customers_email ON customers (email);"
+"index-2.check1.fail" = "Todavía no existe un índice UNIQUE idx_customers_email sobre customers."
+"partial-expression-indexes.title" = "Índices parciales y de expresión"
+"partial-expression-indexes.theory" = """
+Un índice parcial cubre solo las filas que cumplen un WHERE. Es más chico y más barato de mantener cuando siempre buscás en un subconjunto pequeño:
+
+  CREATE INDEX idx_pending ON orders (customer_id) WHERE status = 'pending';
+
+Un índice de expresión guarda el resultado de una expresión, así las búsquedas por esa expresión pueden usarlo:
+
+  CREATE INDEX idx_name_lower ON customers (lower(name));
+  SELECT * FROM customers WHERE lower(name) = 'ada lovelace';   -- puede usar el índice
+
+La consulta tiene que escribir la misma expresión (y, en los parciales, implicar el mismo WHERE) para que el planificador elija el índice."""
+"pindex-1.prompt" = "Creá un índice parcial llamado idx_pending sobre orders (customer_id) que incluya solo los pedidos cuyo status es 'pending'."
+"pindex-1.hint1" = "Agregá WHERE status = 'pending' al final del CREATE INDEX."
+"pindex-1.hint2" = "CREATE INDEX idx_pending ON orders (customer_id) WHERE status = 'pending';"
+"pindex-1.check1.fail" = "El índice idx_pending sobre orders todavía no existe."
+"pindex-1.check2.fail" = "El índice tiene que ser parcial: agregá WHERE status = 'pending'."
+"eindex-1.prompt" = "Creá un índice de expresión llamado idx_customers_lower_name sobre customers usando lower(name)."
+"eindex-1.hint1" = "CREATE INDEX nombre ON customers (lower(name));"
+"eindex-1.hint2" = "CREATE INDEX idx_customers_lower_name ON customers (lower(name));"
+"eindex-1.check1.fail" = "El índice idx_customers_lower_name todavía no existe."
+"eindex-1.check2.fail" = "El índice tiene que ser sobre la expresión lower(name)."
+"explain.title" = "EXPLAIN QUERY PLAN"
+"explain.theory" = """
+¿Cómo sabés si una consulta usa un índice? Pedile su plan:
+
+  EXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;
+
+Sin índice vas a leer SCAN orders: la base recorre todas las filas. Con un índice sobre customer_id pasa a SEARCH orders USING INDEX idx_orders_customer (customer_id=?): salta directo a las filas que coinciden.
+
+Leé los planes antes y después de crear un índice para confirmar que ayuda. SCAN no es un problema en tablas diminutas; en tablas grandes, un SCAN en una consulta frecuente es lo primero que hay que arreglar."""
+"explain-1.prompt" = "Mostrá el plan de la consulta SELECT * FROM orders WHERE customer_id = 1 y leelo: sin índice tiene que decir SCAN."
+"explain-1.hint1" = "EXPLAIN QUERY PLAN va justo antes del SELECT."
+"explain-1.hint2" = "EXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;"
+"explain-1.check1.fail" = "Ejecutá EXPLAIN QUERY PLAN antes del SELECT."
+"explain-2.prompt" = "Hacé que esa misma consulta use un índice: creá uno sobre orders(customer_id) y ejecutá EXPLAIN QUERY PLAN de nuevo para ver SEARCH en vez de SCAN."
+"explain-2.hint1" = "CREATE INDEX ... ON orders (customer_id); y después EXPLAIN QUERY PLAN SELECT ..."
+"explain-2.hint2" = "CREATE INDEX idx_orders_customer ON orders (customer_id);\nEXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;"
+"explain-2.check1.fail" = "orders necesita un índice sobre customer_id."
+"explain-2.check2.fail" = "Ejecutá EXPLAIN QUERY PLAN para confirmar que el plan cambió."
+"analyze.title" = "ANALYZE y el planificador"
+"analyze.theory" = """
+Cuando varios índices podrían responder una consulta, el planificador estima cuál es más barato. ANALYZE junta estadísticas de tus tablas e índices y las guarda en la tabla sqlite_stat1 para que esas estimaciones sean mejores:
+
+  ANALYZE;
+  SELECT * FROM sqlite_stat1;
+
+Ejecutalo después de cargar muchos datos o de crear índices. PRAGMA optimize hace una versión barata de lo mismo y está pensado para correrlo antes de cerrar una conexión larga. Solo se juntan estadísticas de las tablas que tienen un índice."""
+"analyze-1.prompt" = "La tabla orders tiene un índice. Juntá las estadísticas de la base con ANALYZE."
+"analyze-1.hint1" = "Simplemente ANALYZE; (y después mirá sqlite_stat1 si tenés curiosidad)."
+"analyze-1.hint2" = "ANALYZE;"
+"analyze-1.check1.fail" = "Todavía no hay estadísticas para orders: ejecutá ANALYZE."

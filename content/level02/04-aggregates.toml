@@ -1,0 +1,25 @@
+id = "aggregates"
+level = 2
+order = 4
+
+[[exercise]]
+id = "agg-1"
+hints = 2
+solution = ["SELECT count(*) AS total, count(email) AS with_email FROM customers;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT count(*) AS total, count(email) AS with_email FROM customers" },
+]
+
+[[exercise]]
+id = "agg-2"
+hints = 2
+solution = ["SELECT min(price) AS min_price, max(price) AS max_price, avg(price) AS avg_price FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT min(price) AS min_price, max(price) AS max_price, avg(price) AS avg_price FROM products" },
+]

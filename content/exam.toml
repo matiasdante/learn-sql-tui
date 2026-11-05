@@ -1,0 +1,61 @@
+# Examen de ubicación: 2 preguntas por cada uno de los niveles 1 a 5.
+
+[[question]]
+id = "q1-where"
+level = 1
+answer = 0
+options = 4
+
+[[question]]
+id = "q1-null"
+level = 1
+answer = 1
+options = 4
+
+[[question]]
+id = "q2-count"
+level = 2
+answer = 3
+options = 4
+
+[[question]]
+id = "q2-having"
+level = 2
+answer = 1
+options = 4
+
+[[question]]
+id = "q3-left"
+level = 3
+answer = 2
+options = 4
+
+[[question]]
+id = "q3-cross"
+level = 3
+answer = 1
+options = 4
+
+[[question]]
+id = "q4-exists"
+level = 4
+answer = 0
+options = 4
+
+[[question]]
+id = "q4-except"
+level = 4
+answer = 2
+options = 4
+
+[[question]]
+id = "q5-update"
+level = 5
+answer = 2
+options = 4
+
+[[question]]
+id = "q5-upsert"
+level = 5
+answer = 3
+options = 4

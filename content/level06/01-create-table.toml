@@ -1,0 +1,27 @@
+id = "create-table"
+level = 6
+order = 1
+
+[[exercise]]
+id = "create-1"
+hints = 2
+solution = ["CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, year INTEGER);"]
+checks = [
+  { type = "table_exists", name = "books" },
+  { type = "column", table = "books", name = "id", data_type = "INTEGER", pk = true },
+  { type = "column", table = "books", name = "title", data_type = "TEXT", notnull = true },
+  { type = "column", table = "books", name = "year", data_type = "INTEGER" },
+]
+
+[[exercise]]
+id = "create-2"
+hints = 2
+solution = ["CREATE TABLE members (name TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned')), points INTEGER DEFAULT 0);"]
+checks = [
+  { type = "table_exists", name = "members" },
+  { type = "column", table = "members", name = "name", notnull = true },
+  { type = "query_equals", sql = "SELECT dflt_value FROM pragma_table_info('members') WHERE name = 'status'", rows = [["'active'"]] },
+  { type = "column", table = "members", name = "status", notnull = true },
+  { type = "query_equals", sql = "SELECT dflt_value FROM pragma_table_info('members') WHERE name = 'points'", rows = [["0"]] },
+  { type = "query_equals", sql = "SELECT sql LIKE '%CHECK%' FROM sqlite_schema WHERE name = 'members'", rows = [["1"]] },
+]

@@ -1,0 +1,16 @@
+id = "foreign-keys-pragma"
+level = 7
+order = 3
+
+[[exercise]]
+id = "fkpragma-1"
+hints = 2
+solution = ["PRAGMA foreign_keys = ON;\nDELETE FROM authors WHERE name = 'Ada';"]
+setup = [
+  { do = "sql", script = "CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT NOT NULL); CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE, title TEXT); INSERT INTO authors VALUES (1, 'Ada'), (2, 'Grace'); INSERT INTO posts VALUES (1, 1, 'Engines'), (2, 1, 'Notes'), (3, 2, 'Compilers');" },
+]
+checks = [
+  { type = "pragma_equals", pragma = "foreign_keys", value = "1" },
+  { type = "row_count", table = "authors", count = 1 },
+  { type = "row_count", table = "posts", count = 1 },
+]

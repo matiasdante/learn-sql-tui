@@ -1,0 +1,92 @@
+"inner-join.title" = "INNER JOIN: combinar tabelas"
+"inner-join.theory" = """
+Dados relacionados vivem em tabelas diferentes: um pedido só guarda customer_id. Um JOIN une as linhas de duas tabelas por meio de uma condição:
+
+  SELECT o.id, c.name
+  FROM orders AS o
+  JOIN customers AS c ON c.id = o.customer_id;
+
+JOIN é a forma curta de INNER JOIN: só aparecem as linhas que encontram par. Os aliases de tabela (o, c) encurtam a consulta e distinguem colunas com o mesmo nome. Encadeie mais JOINs para trazer mais tabelas."""
+"join-1.prompt" = "Mostre o id de cada pedido (order_id) com o nome do cliente que o fez (customer)."
+"join-1.hint1" = "orders.customer_id aponta para customers.id."
+"join-1.hint2" = "SELECT o.id AS order_id, c.name AS customer FROM orders o JOIN customers c ON c.id = o.customer_id;"
+"join-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"join-2.prompt" = "Para cada linha de cada pedido, mostre o nome do cliente, o nome do produto e a quantidade."
+"join-2.hint1" = "Comece em order_items e faça JOIN com orders, customers e products."
+"join-2.hint2" = "SELECT c.name, p.name, oi.quantity FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN customers c ON c.id = o.customer_id JOIN products p ON p.id = oi.product_id;"
+"join-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"left-join.title" = "LEFT JOIN: manter linhas sem par"
+"left-join.theory" = """
+Um INNER JOIN descarta as linhas sem par. O LEFT JOIN mantém todas as linhas da tabela da esquerda e preenche o lado direito com NULL quando não há correspondência:
+
+  SELECT c.name, o.id
+  FROM customers c
+  LEFT JOIN orders o ON o.customer_id = c.id;
+
+Os clientes sem pedidos aparecem com o.id = NULL. Isso dá um padrão clássico, "linhas que não têm linha relacionada":
+
+  ... LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;
+
+Use count(o.id) em vez de count(*) para contar 0 nesses clientes."""
+"left-1.prompt" = "Mostre o nome de cada cliente com a quantidade de pedidos que fez (coluna n). Os clientes sem pedidos devem aparecer com 0."
+"left-1.hint1" = "LEFT JOIN com orders, GROUP BY por cliente e conte uma coluna de orders (count(o.id))."
+"left-1.hint2" = "SELECT c.name, count(o.id) AS n FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id;"
+"left-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"left-2.prompt" = "Mostre os nomes dos clientes que nunca fizeram um pedido."
+"left-2.hint1" = "Depois do LEFT JOIN, fique com as linhas em que o lado do pedido é NULL."
+"left-2.hint2" = "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;"
+"left-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"right-full-join.title" = "RIGHT JOIN e FULL JOIN"
+"right-full-join.theory" = """
+RIGHT JOIN é o LEFT JOIN visto do outro lado: mantém todas as linhas da tabela da direita. FULL JOIN mantém as linhas sem par dos dois lados:
+
+  SELECT e.name, d.name FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;
+  SELECT e.name, d.name FROM employees e FULL  JOIN departments d ON d.id = e.department_id;
+
+Nos dados da empresa, Legal não tem funcionários e Jonas não tem departamento. RIGHT JOIN e FULL JOIN exigem SQLite 3.39 ou mais novo, que este programa traz embutido. Muita gente simplesmente troca as tabelas e usa LEFT JOIN."""
+"right-1.prompt" = "Mostre o nome de cada departamento (department) com os nomes de seus funcionários (employee). Legal não tem nenhum mas deve aparecer com NULL."
+"right-1.hint1" = "Você pode usar RIGHT JOIN de employees para departments, ou LEFT JOIN de departments para employees."
+"right-1.hint2" = "SELECT d.name AS department, e.name AS employee FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;"
+"right-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"full-1.prompt" = "Mostre cada funcionário (employee) ao lado de seu departamento (department). Jonas, que não tem departamento, e Legal, que não tem funcionários, devem aparecer os dois."
+"full-1.hint1" = "FULL JOIN mantém as linhas sem par das duas tabelas."
+"full-1.hint2" = "SELECT e.name AS employee, d.name AS department FROM employees e FULL JOIN departments d ON d.id = e.department_id;"
+"full-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"cross-join.title" = "CROSS JOIN: todas as combinações"
+"cross-join.theory" = """
+CROSS JOIN emparelha cada linha de uma tabela com cada linha da outra, sem condição. 3 tamanhos x 2 cores dão 6 linhas:
+
+  SELECT s.label, c.label FROM sizes s CROSS JOIN colors c;
+
+Serve para gerar combinações (variantes de um produto, uma grade de calendário), mas cresce rápido: 1000 x 1000 linhas são um milhão. Um JOIN em que se esqueceu a condição ON se comporta igual, então confira sempre a quantidade de linhas."""
+"cross-1.prompt" = "As tabelas sizes e colors têm cada uma uma coluna label. Mostre todas as combinações de tamanho e cor (colunas size e color)."
+"cross-1.hint1" = "Um join sem nenhuma condição ON."
+"cross-1.hint2" = "SELECT s.label AS size, c.label AS color FROM sizes s CROSS JOIN colors c;"
+"cross-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"self-join.title" = "Self join: uma tabela com ela mesma"
+"self-join.theory" = """
+Às vezes uma tabela aponta para si mesma: employees.manager_id guarda o id de outro funcionário. Para ler os dois lados, use a mesma tabela duas vezes com aliases diferentes:
+
+  SELECT e.name AS employee, m.name AS manager
+  FROM employees e
+  LEFT JOIN employees m ON m.id = e.manager_id;
+
+O LEFT JOIN mantém o chefe máximo, cujo manager_id é NULL."""
+"self-1.prompt" = "Mostre cada funcionário (employee) com o nome do seu gerente (manager). Alice não tem gerente e deve aparecer com NULL."
+"self-1.hint1" = "Use employees duas vezes (e e m) e LEFT JOIN com m.id = e.manager_id."
+"self-1.hint2" = "SELECT e.name AS employee, m.name AS manager FROM employees e LEFT JOIN employees m ON m.id = e.manager_id;"
+"self-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"using.title" = "USING: um join mais curto"
+"using.theory" = """
+Quando a coluna do join tem o mesmo nome dos dois lados, o USING economiza digitação e mostra essa coluna uma só vez:
+
+  SELECT b.title, a.name
+  FROM books b
+  JOIN authors a USING (author_id);
+
+É o mesmo que ON b.author_id = a.author_id. O NATURAL JOIN vai além e une por todas as colunas com nome em comum, o que é mais curto mas frágil: adicionar uma coluna depois pode mudar o resultado sem aviso. Prefira USING ou ON."""
+"using-1.prompt" = "As tabelas books e authors compartilham a coluna author_id. Mostre o título de cada livro com o nome de seu autor, unindo-as com USING."
+"using-1.hint1" = "JOIN authors USING (author_id)."
+"using-1.hint2" = "SELECT b.title, a.name FROM books b JOIN authors a USING (author_id);"
+"using-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"using-1.check2.fail" = "Use JOIN ... USING (author_id) como pedido."

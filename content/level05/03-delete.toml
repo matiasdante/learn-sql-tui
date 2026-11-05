@@ -1,0 +1,15 @@
+id = "delete"
+level = 5
+order = 3
+
+[[exercise]]
+id = "delete-1"
+hints = 2
+solution = ["DELETE FROM tasks WHERE done = 1;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "row_count", table = "tasks", count = 0, filter = "done = 1" },
+  { type = "row_count", table = "tasks", count = 3 },
+]

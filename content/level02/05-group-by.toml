@@ -1,0 +1,25 @@
+id = "group-by"
+level = 2
+order = 5
+
+[[exercise]]
+id = "group-1"
+hints = 2
+solution = ["SELECT status, count(*) AS n FROM orders GROUP BY status;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT status, count(*) AS n FROM orders GROUP BY status" },
+]
+
+[[exercise]]
+id = "group-2"
+hints = 2
+solution = ["SELECT category, avg(price) AS avg_price FROM products GROUP BY category;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT category, avg(price) AS avg_price FROM products GROUP BY category" },
+]

@@ -1,0 +1,25 @@
+id = "where"
+level = 1
+order = 3
+
+[[exercise]]
+id = "where-1"
+hints = 2
+solution = ["SELECT name, price FROM products WHERE price > 100;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, price FROM products WHERE price > 100" },
+]
+
+[[exercise]]
+id = "where-2"
+hints = 2
+solution = ["SELECT name FROM customers WHERE country = 'USA' AND city <> 'Boston';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers WHERE country = 'USA' AND city <> 'Boston'" },
+]

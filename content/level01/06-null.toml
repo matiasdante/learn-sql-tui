@@ -1,0 +1,25 @@
+id = "null"
+level = 1
+order = 6
+
+[[exercise]]
+id = "null-1"
+hints = 2
+solution = ["SELECT name FROM customers WHERE email IS NULL;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers WHERE email IS NULL" },
+]
+
+[[exercise]]
+id = "null-2"
+hints = 2
+solution = ["SELECT name, email FROM customers WHERE email IS NOT NULL;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, email FROM customers WHERE email IS NOT NULL" },
+]

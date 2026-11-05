@@ -1,0 +1,79 @@
+"attach.title" = "ATTACH: usar varios archivos de base de datos"
+"attach.theory" = """
+Una base SQLite es un archivo. ATTACH abre otro archivo con un nombre y después podés consultar los dos en la misma sentencia:
+
+  ATTACH DATABASE 'archive.db' AS archive;
+  CREATE TABLE archive.old_orders AS SELECT * FROM orders WHERE status = 'shipped';
+  SELECT count(*) FROM archive.old_orders;
+  DETACH archive;
+
+Las tablas de la base principal se usan sin prefijo (main.orders); las adjuntas necesitan el suyo (archive.old_orders). Si el archivo no existe se crea. Las bases adjuntas se ven con PRAGMA database_list.
+
+En este sandbox, ATTACH solo funciona con archivos dentro de la carpeta de práctica: no se puede abrir ni crear nada fuera de ella."""
+"attach-1.prompt" = "Adjuntá un archivo nuevo archive.db con el nombre archive y copiá los pedidos shipped a una tabla nueva archive.shipped_orders (CREATE TABLE ... AS SELECT)."
+"attach-1.hint1" = "ATTACH DATABASE 'archive.db' AS archive; y después CREATE TABLE archive.shipped_orders AS SELECT ..."
+"attach-1.hint2" = "ATTACH DATABASE 'archive.db' AS archive;\nCREATE TABLE archive.shipped_orders AS SELECT * FROM orders WHERE status = 'shipped';"
+"attach-1.check1.fail" = "La base tiene que estar adjunta con el nombre archive."
+"attach-1.check2.fail" = "archive.shipped_orders tiene que contener los 6 pedidos shipped."
+"attach-1.check3.fail" = "No se creó el archivo archive.db."
+"vacuum.title" = "VACUUM y copias de seguridad"
+"vacuum.theory" = """
+Cuando hacés DELETE de filas, el archivo no se achica: el espacio liberado se reutiliza más adelante. VACUUM reconstruye todo el archivo sin ese espacio libre:
+
+  VACUUM;
+
+No admite una transacción abierta y necesita lugar temporal para una copia de la base. Una forma relacionada escribe el resultado compactado en un archivo nuevo y deja el original intacto, lo que sirve como copia de seguridad de una base en uso:
+
+  VACUUM INTO 'backup.db';
+
+Otras herramientas: PRAGMA page_count y PRAGMA freelist_count muestran cuántas páginas tiene el archivo y cuántas están libres."""
+"vacuum-1.prompt" = "Hacé una copia de seguridad compactada de la base en el archivo backup.db."
+"vacuum-1.hint1" = "VACUUM INTO 'backup.db';"
+"vacuum-1.hint2" = "VACUUM INTO 'backup.db';"
+"vacuum-1.check1.fail" = "El archivo backup.db todavía no existe."
+"vacuum-1.check2.fail" = "Usá VACUUM INTO como se pidió."
+"integrity.title" = "integrity_check y quick_check"
+"integrity.theory" = """
+Los discos fallan y los archivos se truncan. PRAGMA integrity_check lee toda la base y verifica que su estructura esté sana:
+
+  PRAGMA integrity_check;        -- una fila con ok, o una lista de problemas
+  PRAGMA quick_check;            -- más rápido, saltea algunas verificaciones
+  PRAGMA foreign_key_check;      -- problemas lógicos: filas huérfanas
+
+Ejecutalo después de una caída, antes y después de restaurar, o desde una tarea programada. Si informa problemas, restaurá tu último backup bueno: reparar a mano casi nunca vale la pena."""
+"integrity-1.prompt" = "Verificá que la base esté sana con PRAGMA integrity_check. La respuesta tiene que ser ok."
+"integrity-1.hint1" = "PRAGMA integrity_check;"
+"integrity-1.hint2" = "PRAGMA integrity_check;"
+"integrity-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"import-csv.title" = "Importar archivos CSV"
+"import-csv.theory" = """
+CSV es el formato universal de intercambio. El comando .import carga un archivo en una tabla:
+
+  .import people.csv people              crea la tabla people si no existe,
+                                         tomando los nombres de columna de la primera fila
+  .import --skip 1 temps.csv temps       la tabla ya existe: saltea la fila de encabezado
+
+Las tablas creadas por .import tienen solo columnas TEXT. Para tipos reales, creá primero la tabla con los tipos de columna correctos y usá --skip 1: SQLite convierte '3.5' en un REAL por la afinidad de la columna. Para ver las filas de un archivo podés crearlo con el comando edit (edit people.csv) y volver a leerlo con .read o .import."""
+"import-1.prompt" = "El archivo people.csv (name,age,city) está en la carpeta de práctica. Importalo en una tabla nueva llamada people, dejando que .import cree la tabla a partir de la fila de encabezado."
+"import-1.hint1" = ".import people.csv people"
+"import-1.hint2" = ".import people.csv people"
+"import-1.check1.fail" = "La tabla people todavía no existe."
+"import-1.check2.fail" = "people debería contener las 3 personas del archivo (no el encabezado)."
+"import-1.check3.fail" = "Las columnas tienen que ser name, age y city."
+"import-2.prompt" = "La tabla temperatures (day TEXT, celsius REAL) ya existe y el archivo temps.csv tiene una fila de encabezado. Importá sus filas de datos sin el encabezado."
+"import-2.hint1" = ".import --skip 1 temps.csv temperatures"
+"import-2.hint2" = ".import --skip 1 temps.csv temperatures"
+"import-2.check1.fail" = "temperatures debería tener exactamente las 3 filas de datos (sin fila de encabezado)."
+"import-2.check2.fail" = "Los valores deberían guardarse como números REAL."
+"user-version.title" = "user_version y migraciones"
+"user-version.theory" = """
+Las aplicaciones van cambiando sus tablas con el tiempo. SQLite deja un entero libre en el encabezado del archivo para que lleves la versión del esquema:
+
+  PRAGMA user_version;          -- 0 en una base nueva
+  PRAGMA user_version = 3;
+
+Una rutina de migración típica al arrancar: leer user_version; si es 1, ejecutar el script que lleva a 2 y poner user_version = 2; y así hasta llegar a la última. Hacé cada paso dentro de una transacción para que un fallo deje la base en una versión conocida. Otros valores útiles del encabezado: PRAGMA application_id, PRAGMA journal_mode (WAL permite lectores durante una escritura) y PRAGMA page_size."""
+"userversion-1.prompt" = "Marcá esta base como versión de esquema 3 usando PRAGMA user_version."
+"userversion-1.hint1" = "PRAGMA user_version = 3;"
+"userversion-1.hint2" = "PRAGMA user_version = 3;"
+"userversion-1.check1.fail" = "user_version todavía no es 3."

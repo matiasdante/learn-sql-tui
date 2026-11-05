@@ -1,0 +1,15 @@
+id = "vacuum"
+level = 10
+order = 2
+
+[[exercise]]
+id = "vacuum-1"
+hints = 2
+solution = ["VACUUM INTO 'backup.db';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "file_exists", path = "backup.db" },
+  { type = "ran", any = ["VACUUM INTO"] },
+]

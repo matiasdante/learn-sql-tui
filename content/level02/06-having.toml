@@ -1,0 +1,25 @@
+id = "having"
+level = 2
+order = 6
+
+[[exercise]]
+id = "having-1"
+hints = 2
+solution = ["SELECT category, count(*) AS n FROM products GROUP BY category HAVING count(*) > 2;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT category, count(*) AS n FROM products GROUP BY category HAVING count(*) > 2" },
+]
+
+[[exercise]]
+id = "having-2"
+hints = 2
+solution = ["SELECT product_id, sum(quantity) AS total FROM order_items GROUP BY product_id HAVING sum(quantity) > 5;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT product_id, sum(quantity) AS total FROM order_items GROUP BY product_id HAVING sum(quantity) > 5" },
+]

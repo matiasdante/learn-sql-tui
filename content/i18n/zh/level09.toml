@@ -1,0 +1,79 @@
+"window-functions.title" = "窗口函数"
+"window-functions.theory" = """
+窗口函数在一组相关的行上做计算，但与 GROUP BY 不同，它会保留每一行。OVER (...) 用来定义窗口：
+
+  SELECT name, department_id, salary,
+         RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS pos
+  FROM employees;
+
+PARTITION BY 把行分成若干组（类似 GROUP BY），ORDER BY 在每组内部排序。常用函数：ROW_NUMBER()、RANK()（并列者共享名次）、DENSE_RANK()、LAG(x)、LEAD(x)，以及任何配合 OVER 使用的聚合函数：
+
+  SUM(salary) OVER (ORDER BY hired_at)       -- 累计总和"""
+"win-1.prompt" = "显示有部门的员工的 name、department_id、salary 和 salary_rank。salary_rank 是工资在所在部门内的 RANK()，工资最高的排第一。"
+"win-1.hint1" = "RANK() OVER (PARTITION BY department_id ORDER BY salary DESC)，并加上 WHERE department_id IS NOT NULL。"
+"win-1.hint2" = "SELECT name, department_id, salary, RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees WHERE department_id IS NOT NULL;"
+"win-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"win-2.prompt" = "显示 name、hired_at 和 running_payroll：按入职顺序累计的工资总和（用 id 打破并列）。"
+"win-2.hint1" = "SUM(salary) OVER (ORDER BY hired_at, id)。"
+"win-2.hint2" = "SELECT name, hired_at, SUM(salary) OVER (ORDER BY hired_at, id) AS running_payroll FROM employees;"
+"win-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"triggers.title" = "触发器"
+"triggers.theory" = """
+触发器会在插入、更新或删除一行时自动执行 SQL。在触发器内部，OLD 是修改前的行，NEW 是修改后的行：
+
+  CREATE TRIGGER price_audit
+  AFTER UPDATE OF price ON products
+  BEGIN
+    INSERT INTO price_log (product_id, old_price, new_price)
+    VALUES (OLD.id, OLD.price, NEW.price);
+  END;
+
+典型用途：审计日志、保持派生数据同步，以及在 BEFORE 触发器里用 SELECT RAISE(ABORT, '提示') 阻止修改。整个 CREATE TRIGGER 是一条语句：控制台会等到 END; 才执行。用 DROP TRIGGER 删除。"""
+"trigger-1.prompt" = "创建触发器 price_audit：商品价格变化后，把它的 id、旧价格和新价格插入 price_log。然后把商品 1（Pen）的价格改为 1.5，让触发器记录下来。"
+"trigger-1.hint1" = "CREATE TRIGGER ... AFTER UPDATE OF price ON products BEGIN INSERT ... VALUES (OLD.id, OLD.price, NEW.price); END;"
+"trigger-1.hint2" = "CREATE TRIGGER price_audit AFTER UPDATE OF price ON products BEGIN INSERT INTO price_log (product_id, old_price, new_price) VALUES (OLD.id, OLD.price, NEW.price); END;\nUPDATE products SET price = 1.5 WHERE id = 1;"
+"trigger-1.check1.fail" = "products 上的触发器 price_audit 还不存在。"
+"trigger-1.check2.fail" = "price_log 中应当有一行：商品 1，从 1.2 变为 1.5。请在创建触发器之后再修改价格。"
+"trigger-1.check3.fail" = "商品 1 的价格必须是 1.5。"
+"json.title" = "SQLite 中的 JSON"
+"json.theory" = """
+SQLite 把 JSON 当作文本保存，并提供读取它的函数：
+
+  json_extract(payload, '$.user')        取某个路径上的值
+  payload ->> '$.user'                   同上，写法更短
+  json_array_length(payload, '$.tags')   数组长度
+  json_each(payload, '$.tags')           每个元素一行（返回表的函数）
+  json_valid(x)                          是不是合法的 JSON？
+
+  SELECT e.id, t.value
+  FROM events e, json_each(e.payload, '$.tags') AS t;
+
+路径以 $ 开头；对象用 .键，数组位置用 [0]。JSON 适合松散的数据，但需要过滤和连接的内容更适合放在关系型的列中。"""
+"json-1.prompt" = "events 表的 payload 列保存 JSON。显示每个事件的 id 以及 JSON 中的 user（列名 user）。"
+"json-1.hint1" = "json_extract(payload, '$.user') 或 payload ->> '$.user'。"
+"json-1.hint2" = "SELECT id, json_extract(payload, '$.user') AS user FROM events;"
+"json-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"json-2.prompt" = "为每个事件的每个标签显示一行：事件 id（id）和标签（tag）。没有标签的事件不出现。"
+"json-2.hint1" = "FROM events e, json_each(e.payload, '$.tags') AS t，并选取 t.value。"
+"json-2.hint2" = "SELECT e.id, t.value AS tag FROM events e, json_each(e.payload, '$.tags') AS t;"
+"json-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"fts5.title" = "用 FTS5 做全文搜索"
+"fts5.theory" = """
+LIKE '%单词%' 要读遍每一行，也无法按相关度排序。FTS5 会在虚拟表中建立全文索引：
+
+  CREATE VIRTUAL TABLE docs USING fts5(title, body);
+  INSERT INTO docs VALUES ('Joins', 'A join combines rows from two tables');
+  SELECT title FROM docs WHERE docs MATCH 'rows';
+  SELECT title FROM docs WHERE docs MATCH 'body:join OR title:index' ORDER BY rank;
+
+MATCH 支持单词、AND / OR / NOT、"精确短语"、前缀（data*）以及按列过滤（title:sql）。ORDER BY rank 按相关度排序。FTS5 已包含在本程序内置的 SQLite 中。"""
+"fts-1.prompt" = "使用全文搜索（MATCH），显示 docs 中提到单词 fast 的文档标题。"
+"fts-1.hint1" = "WHERE docs MATCH 'fast'（MATCH 左边写表名）。"
+"fts-1.hint2" = "SELECT title FROM docs WHERE docs MATCH 'fast';"
+"fts-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"fts-1.check2.fail" = "请按要求使用 MATCH。"
+"fts-2.prompt" = "创建名为 notes 的 FTS5 虚拟表，包含 title 和 body 两列，并向其中插入两条笔记。"
+"fts-2.hint1" = "CREATE VIRTUAL TABLE notes USING fts5(title, body);"
+"fts-2.hint2" = "CREATE VIRTUAL TABLE notes USING fts5(title, body);\nINSERT INTO notes VALUES ('Shopping', 'milk and eggs'), ('Ideas', 'learn full-text search');"
+"fts-2.check1.fail" = "notes 必须是 USING fts5 的虚拟表。"
+"fts-2.check2.fail" = "notes 中应当恰好有两条笔记。"

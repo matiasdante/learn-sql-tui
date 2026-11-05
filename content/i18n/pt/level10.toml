@@ -1,0 +1,79 @@
+"attach.title" = "ATTACH: usar vários arquivos de banco de dados"
+"attach.theory" = """
+Um banco SQLite é um arquivo. ATTACH abre outro arquivo com um nome e depois você pode consultar os dois na mesma instrução:
+
+  ATTACH DATABASE 'archive.db' AS archive;
+  CREATE TABLE archive.old_orders AS SELECT * FROM orders WHERE status = 'shipped';
+  SELECT count(*) FROM archive.old_orders;
+  DETACH archive;
+
+As tabelas do banco principal são usadas sem prefixo (main.orders); as anexadas precisam do seu (archive.old_orders). Se o arquivo não existe, ele é criado. Os bancos anexados aparecem com PRAGMA database_list.
+
+Neste sandbox, o ATTACH só funciona com arquivos dentro da pasta de prática: nada fora dela pode ser aberto ou criado."""
+"attach-1.prompt" = "Anexe um arquivo novo archive.db com o nome archive e copie os pedidos shipped para uma tabela nova archive.shipped_orders (CREATE TABLE ... AS SELECT)."
+"attach-1.hint1" = "ATTACH DATABASE 'archive.db' AS archive; e depois CREATE TABLE archive.shipped_orders AS SELECT ..."
+"attach-1.hint2" = "ATTACH DATABASE 'archive.db' AS archive;\nCREATE TABLE archive.shipped_orders AS SELECT * FROM orders WHERE status = 'shipped';"
+"attach-1.check1.fail" = "O banco precisa estar anexado com o nome archive."
+"attach-1.check2.fail" = "archive.shipped_orders precisa conter os 6 pedidos shipped."
+"attach-1.check3.fail" = "O arquivo archive.db não foi criado."
+"vacuum.title" = "VACUUM e backups"
+"vacuum.theory" = """
+Quando você faz DELETE de linhas, o arquivo não diminui: o espaço liberado é reaproveitado depois. VACUUM reconstrói o arquivo inteiro sem esse espaço livre:
+
+  VACUUM;
+
+Não aceita uma transação aberta e precisa de espaço temporário para uma cópia do banco. Uma forma relacionada grava o resultado compactado em um arquivo novo e deixa o original intacto, o que serve como backup de um banco em uso:
+
+  VACUUM INTO 'backup.db';
+
+Outras ferramentas: PRAGMA page_count e PRAGMA freelist_count mostram quantas páginas o arquivo tem e quantas estão livres."""
+"vacuum-1.prompt" = "Faça uma cópia de segurança compactada do banco no arquivo backup.db."
+"vacuum-1.hint1" = "VACUUM INTO 'backup.db';"
+"vacuum-1.hint2" = "VACUUM INTO 'backup.db';"
+"vacuum-1.check1.fail" = "O arquivo backup.db ainda não existe."
+"vacuum-1.check2.fail" = "Use VACUUM INTO como pedido."
+"integrity.title" = "integrity_check e quick_check"
+"integrity.theory" = """
+Discos falham e arquivos são truncados. PRAGMA integrity_check lê o banco inteiro e verifica se a estrutura está saudável:
+
+  PRAGMA integrity_check;        -- uma linha com ok, ou uma lista de problemas
+  PRAGMA quick_check;            -- mais rápido, pula algumas verificações
+  PRAGMA foreign_key_check;      -- problemas lógicos: linhas órfãs
+
+Execute depois de uma queda, antes e depois de restaurar, ou em uma tarefa agendada. Se relatar problemas, restaure seu último backup bom: consertar à mão quase nunca vale a pena."""
+"integrity-1.prompt" = "Verifique se o banco está saudável com PRAGMA integrity_check. A resposta deve ser ok."
+"integrity-1.hint1" = "PRAGMA integrity_check;"
+"integrity-1.hint2" = "PRAGMA integrity_check;"
+"integrity-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"import-csv.title" = "Importar arquivos CSV"
+"import-csv.theory" = """
+CSV é o formato universal de intercâmbio. O comando .import carrega um arquivo em uma tabela:
+
+  .import people.csv people              cria a tabela people se não existir,
+                                         tomando os nomes das colunas da primeira linha
+  .import --skip 1 temps.csv temps       a tabela já existe: pula a linha de cabeçalho
+
+As tabelas criadas pelo .import têm só colunas TEXT. Para tipos reais, crie primeiro a tabela com os tipos de coluna corretos e use --skip 1: o SQLite converte '3.5' em um REAL pela afinidade da coluna. Para ver as linhas de um arquivo você pode criá-lo com o comando edit (edit people.csv) e relê-lo com .read ou .import."""
+"import-1.prompt" = "O arquivo people.csv (name,age,city) está na pasta de prática. Importe-o em uma tabela nova chamada people, deixando o .import criar a tabela a partir da linha de cabeçalho."
+"import-1.hint1" = ".import people.csv people"
+"import-1.hint2" = ".import people.csv people"
+"import-1.check1.fail" = "A tabela people ainda não existe."
+"import-1.check2.fail" = "people deveria conter as 3 pessoas do arquivo (não o cabeçalho)."
+"import-1.check3.fail" = "As colunas precisam ser name, age e city."
+"import-2.prompt" = "A tabela temperatures (day TEXT, celsius REAL) já existe e o arquivo temps.csv tem uma linha de cabeçalho. Importe suas linhas de dados sem o cabeçalho."
+"import-2.hint1" = ".import --skip 1 temps.csv temperatures"
+"import-2.hint2" = ".import --skip 1 temps.csv temperatures"
+"import-2.check1.fail" = "temperatures deveria ter exatamente as 3 linhas de dados (sem linha de cabeçalho)."
+"import-2.check2.fail" = "Os valores deveriam ser guardados como números REAL."
+"user-version.title" = "user_version e migrações"
+"user-version.theory" = """
+As aplicações vão mudando suas tabelas com o tempo. O SQLite deixa um inteiro livre no cabeçalho do arquivo para você controlar a versão do esquema:
+
+  PRAGMA user_version;          -- 0 em um banco novo
+  PRAGMA user_version = 3;
+
+Uma rotina de migração típica na inicialização: ler user_version; se for 1, executar o script que leva a 2 e definir user_version = 2; e assim até chegar à última. Faça cada passo dentro de uma transação para que uma falha deixe o banco em uma versão conhecida. Outros valores úteis do cabeçalho: PRAGMA application_id, PRAGMA journal_mode (WAL permite leitores durante uma escrita) e PRAGMA page_size."""
+"userversion-1.prompt" = "Marque este banco como versão de esquema 3 usando PRAGMA user_version."
+"userversion-1.hint1" = "PRAGMA user_version = 3;"
+"userversion-1.hint2" = "PRAGMA user_version = 3;"
+"userversion-1.check1.fail" = "user_version ainda não é 3."

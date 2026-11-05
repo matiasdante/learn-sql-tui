@@ -1,0 +1,159 @@
+"select.title" = "SELECT: reading rows"
+"select.theory" = """
+A table is a grid of rows and columns. SELECT reads from it without changing anything:
+
+  SELECT name, city FROM customers;
+  SELECT * FROM products;        -- * means every column
+
+The practice database is a small online shop: customers, products, orders and order_items. Type .tables to list the tables and .schema customers to see how one is built.
+
+Statements end with ; and can span several lines. Press F1 for a hint and F5 when you think you are done."""
+"select-1.prompt" = "Show the name and the city of every customer."
+"select-1.hint1" = "Name the two columns after SELECT, separated by a comma."
+"select-1.hint2" = "SELECT name, city FROM customers;"
+"select-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"select-2.prompt" = "Show every column of the products table."
+"select-2.hint1" = "There is a shortcut for \"all columns\"."
+"select-2.hint2" = "SELECT * FROM products;"
+"select-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"expressions.title" = "Expressions and aliases"
+"expressions.theory" = """
+A SELECT can calculate values, not only copy columns. AS gives the result a name (an alias):
+
+  SELECT name, price * stock AS stock_value FROM products;
+
+Text is joined with ||:
+
+  SELECT name || ' (' || country || ')' AS label FROM customers;
+
+Text goes between single quotes. Double quotes are for names of columns and tables."""
+"expr-1.prompt" = "Show each product name and its stock value (price times stock) in a column called stock_value."
+"expr-1.hint1" = "Multiply the two columns and name the result with AS."
+"expr-1.hint2" = "SELECT name, price * stock AS stock_value FROM products;"
+"expr-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"expr-2.prompt" = "Show each customer as one text column called label, in the format Ada Lovelace (UK): the name, a space, and the country in parentheses."
+"expr-2.hint1" = "Join the pieces with ||, including the literal ' (' and ')'."
+"expr-2.hint2" = "SELECT name || ' (' || country || ')' AS label FROM customers;"
+"expr-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"where.title" = "WHERE: filtering rows"
+"where.theory" = """
+WHERE keeps only the rows that satisfy a condition:
+
+  SELECT name, price FROM products WHERE price > 100;
+
+Comparisons: =  <>  <  <=  >  >=  (note that equality is a single =). Combine conditions with AND, OR and NOT:
+
+  SELECT name FROM customers WHERE country = 'UK' AND city <> 'London';
+
+AND is evaluated before OR; use parentheses when in doubt."""
+"where-1.prompt" = "Show the name and price of the products that cost more than 100."
+"where-1.hint1" = "Filter with WHERE on the price column."
+"where-1.hint2" = "SELECT name, price FROM products WHERE price > 100;"
+"where-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"where-2.prompt" = "Show the name of the customers from the USA whose city is not Boston."
+"where-2.hint1" = "Two conditions joined by AND; one of them uses <>."
+"where-2.hint2" = "SELECT name FROM customers WHERE country = 'USA' AND city <> 'Boston';"
+"where-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"order-limit.title" = "ORDER BY, LIMIT and OFFSET"
+"order-limit.theory" = """
+Without ORDER BY the database may return rows in any order. Ask for one:
+
+  SELECT name, price FROM products ORDER BY price DESC;     -- highest first
+  SELECT name FROM customers ORDER BY country, name;        -- by country, then by name
+
+LIMIT keeps the first rows and OFFSET skips some, which is how pages work:
+
+  SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 3;   -- the second page of 3
+
+ASC (the default) sorts upward and DESC downward."""
+"orderlimit-1.prompt" = "Show the name and price of the 3 most expensive products, the most expensive first."
+"orderlimit-1.hint1" = "Sort by price from high to low and keep only 3 rows."
+"orderlimit-1.hint2" = "SELECT name, price FROM products ORDER BY price DESC LIMIT 3;"
+"orderlimit-1.check1.fail" = "Your last query does not return the rows asked for, in the order asked for. Check the ORDER BY."
+"orderlimit-2.prompt" = "Order the customers by name, skip the first 2 and show the names of the next 3."
+"orderlimit-2.hint1" = "LIMIT takes 3 rows; OFFSET skips 2."
+"orderlimit-2.hint2" = "SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 2;"
+"orderlimit-2.check1.fail" = "Your last query does not return the rows asked for, in the order asked for. Check the ORDER BY."
+"distinct.title" = "DISTINCT: removing duplicates"
+"distinct.theory" = """
+When several rows share a value, a plain SELECT repeats it. DISTINCT keeps each different result once:
+
+  SELECT category FROM products;            -- one row per product
+  SELECT DISTINCT category FROM products;   -- one row per category
+
+DISTINCT applies to the whole row: SELECT DISTINCT country, city keeps each different pair."""
+"distinct-1.prompt" = "Show each country that has customers, once."
+"distinct-1.hint1" = "Add a keyword right after SELECT."
+"distinct-1.hint2" = "SELECT DISTINCT country FROM customers;"
+"distinct-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"null.title" = "NULL: the absence of a value"
+"null.theory" = """
+NULL means "unknown" or "no value". It is not zero and not an empty text. Any comparison with NULL gives NULL (not true), so this finds nothing:
+
+  SELECT name FROM customers WHERE email = NULL;      -- always empty
+
+Use IS NULL and IS NOT NULL:
+
+  SELECT name FROM customers WHERE email IS NULL;
+  SELECT name FROM customers WHERE email IS NOT NULL;"""
+"null-1.prompt" = "Show the name of the customers that have no email."
+"null-1.hint1" = "= NULL never matches. There is a special operator."
+"null-1.hint2" = "SELECT name FROM customers WHERE email IS NULL;"
+"null-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"null-2.prompt" = "Show the name and email of the customers that do have an email."
+"null-2.hint1" = "Use IS NOT NULL."
+"null-2.hint2" = "SELECT name, email FROM customers WHERE email IS NOT NULL;"
+"null-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"like.title" = "LIKE: searching text patterns"
+"like.theory" = """
+LIKE compares text with a pattern. % matches any run of characters (even none) and _ matches exactly one:
+
+  SELECT name FROM customers WHERE name LIKE 'M%';       -- starts with M
+  SELECT name FROM products  WHERE name LIKE '%top';     -- ends with top
+  SELECT name FROM products  WHERE name LIKE '_en%';     -- second letter e, third n
+
+In SQLite, LIKE ignores upper/lower case for plain English letters."""
+"like-1.prompt" = "Show the name of the customers whose name starts with M."
+"like-1.hint1" = "The pattern is the letter followed by %."
+"like-1.hint2" = "SELECT name FROM customers WHERE name LIKE 'M%';"
+"like-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"like-2.prompt" = "Show the name of the products whose name contains the letters \"on\" anywhere."
+"like-2.hint1" = "Put % on both sides of the letters."
+"like-2.hint2" = "SELECT name FROM products WHERE name LIKE '%on%';"
+"like-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"in-between.title" = "IN and BETWEEN"
+"in-between.theory" = """
+IN replaces a chain of ORs:
+
+  SELECT name FROM products WHERE category IN ('furniture', 'stationery');
+
+BETWEEN checks a range, with both ends included:
+
+  SELECT id FROM orders WHERE ordered_at BETWEEN '2024-01-01' AND '2024-01-31';
+
+Dates are stored as text in the form YYYY-MM-DD, so comparing them as text sorts them correctly."""
+"in-1.prompt" = "Show the name and category of the products in the categories furniture or accessories."
+"in-1.hint1" = "Put both categories inside IN (...)."
+"in-1.hint2" = "SELECT name, category FROM products WHERE category IN ('furniture', 'accessories');"
+"in-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"between-1.prompt" = "Show the id and ordered_at of the orders placed from 2024-02-01 to 2024-03-01, both days included."
+"between-1.hint1" = "BETWEEN already includes both ends."
+"between-1.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at BETWEEN '2024-02-01' AND '2024-03-01';"
+"between-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"case.title" = "CASE: conditions inside a query"
+"case.theory" = """
+CASE is SQL's if/else. The first WHEN that is true decides the value:
+
+  SELECT name,
+         CASE
+           WHEN price >= 500 THEN 'expensive'
+           WHEN price >= 50  THEN 'medium'
+           ELSE 'cheap'
+         END AS tier
+  FROM products;
+
+Without ELSE, a row that matches no WHEN gets NULL."""
+"case-1.prompt" = "Show each product name and a column called level: 'out' when the stock is 0, 'low' when it is under 20, and 'ok' otherwise."
+"case-1.hint1" = "Test the most specific case first: stock = 0."
+"case-1.hint2" = "SELECT name, CASE WHEN stock = 0 THEN 'out' WHEN stock < 20 THEN 'low' ELSE 'ok' END AS level FROM products;"
+"case-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."

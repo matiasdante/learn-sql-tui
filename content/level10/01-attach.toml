@@ -1,0 +1,16 @@
+id = "attach"
+level = 10
+order = 1
+
+[[exercise]]
+id = "attach-1"
+hints = 2
+solution = ["ATTACH DATABASE 'archive.db' AS archive;\nCREATE TABLE archive.shipped_orders AS SELECT * FROM orders WHERE status = 'shipped';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT count(*) FROM pragma_database_list WHERE name = 'archive'", rows = [["1"]] },
+  { type = "query_equals", sql = "SELECT count(*) FROM archive.shipped_orders", rows = [["6"]] },
+  { type = "file_exists", path = "archive.db" },
+]

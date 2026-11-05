@@ -1,0 +1,159 @@
+"select.title" = "SELECT: ler linhas"
+"select.theory" = """
+Uma tabela é uma grade de linhas e colunas. O SELECT lê dela sem alterar nada:
+
+  SELECT name, city FROM customers;
+  SELECT * FROM products;        -- * significa todas as colunas
+
+O banco de prática é uma pequena loja online: customers, products, orders e order_items. Digite .tables para listar as tabelas e .schema customers para ver como uma é construída.
+
+As instruções terminam com ; e podem ocupar várias linhas. Aperte F1 para uma dica e F5 quando achar que terminou."""
+"select-1.prompt" = "Mostre o nome e a cidade de cada cliente."
+"select-1.hint1" = "Escreva as duas colunas depois de SELECT, separadas por vírgula."
+"select-1.hint2" = "SELECT name, city FROM customers;"
+"select-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"select-2.prompt" = "Mostre todas as colunas da tabela products."
+"select-2.hint1" = "Existe um atalho para \"todas as colunas\"."
+"select-2.hint2" = "SELECT * FROM products;"
+"select-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"expressions.title" = "Expressões e aliases"
+"expressions.theory" = """
+Um SELECT pode calcular valores, não só copiar colunas. O AS dá um nome (alias) ao resultado:
+
+  SELECT name, price * stock AS stock_value FROM products;
+
+O texto é unido com ||:
+
+  SELECT name || ' (' || country || ')' AS label FROM customers;
+
+O texto vai entre aspas simples. As aspas duplas são para nomes de colunas e tabelas."""
+"expr-1.prompt" = "Mostre o nome de cada produto e seu valor em estoque (preço vezes estoque) em uma coluna chamada stock_value."
+"expr-1.hint1" = "Multiplique as duas colunas e nomeie o resultado com AS."
+"expr-1.hint2" = "SELECT name, price * stock AS stock_value FROM products;"
+"expr-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"expr-2.prompt" = "Mostre cada cliente em uma única coluna de texto chamada label, no formato Ada Lovelace (UK): o nome, um espaço e o país entre parênteses."
+"expr-2.hint1" = "Una os pedaços com ||, incluindo os literais ' (' e ')'."
+"expr-2.hint2" = "SELECT name || ' (' || country || ')' AS label FROM customers;"
+"expr-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"where.title" = "WHERE: filtrar linhas"
+"where.theory" = """
+O WHERE mantém só as linhas que cumprem uma condição:
+
+  SELECT name, price FROM products WHERE price > 100;
+
+Comparações: =  <>  <  <=  >  >=  (a igualdade é um único =). Combine condições com AND, OR e NOT:
+
+  SELECT name FROM customers WHERE country = 'UK' AND city <> 'London';
+
+O AND é avaliado antes do OR; use parênteses na dúvida."""
+"where-1.prompt" = "Mostre o nome e o preço dos produtos que custam mais de 100."
+"where-1.hint1" = "Filtre com WHERE na coluna price."
+"where-1.hint2" = "SELECT name, price FROM products WHERE price > 100;"
+"where-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"where-2.prompt" = "Mostre o nome dos clientes dos USA cuja cidade não é Boston."
+"where-2.hint1" = "Duas condições unidas por AND; uma usa <>."
+"where-2.hint2" = "SELECT name FROM customers WHERE country = 'USA' AND city <> 'Boston';"
+"where-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"order-limit.title" = "ORDER BY, LIMIT e OFFSET"
+"order-limit.theory" = """
+Sem ORDER BY o banco pode devolver as linhas em qualquer ordem. Peça uma:
+
+  SELECT name, price FROM products ORDER BY price DESC;     -- o mais caro primeiro
+  SELECT name FROM customers ORDER BY country, name;        -- por país e depois por nome
+
+O LIMIT fica com as primeiras linhas e o OFFSET pula algumas, que é como as páginas funcionam:
+
+  SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 3;   -- a segunda página de 3
+
+ASC (o padrão) ordena para cima e DESC para baixo."""
+"orderlimit-1.prompt" = "Mostre o nome e o preço dos 3 produtos mais caros, o mais caro primeiro."
+"orderlimit-1.hint1" = "Ordene por preço do maior para o menor e fique com 3 linhas."
+"orderlimit-1.hint2" = "SELECT name, price FROM products ORDER BY price DESC LIMIT 3;"
+"orderlimit-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas na ordem pedida. Confira o ORDER BY."
+"orderlimit-2.prompt" = "Ordene os clientes por nome, pule os 2 primeiros e mostre os nomes dos 3 seguintes."
+"orderlimit-2.hint1" = "LIMIT pega 3 linhas; OFFSET pula 2."
+"orderlimit-2.hint2" = "SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 2;"
+"orderlimit-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas na ordem pedida. Confira o ORDER BY."
+"distinct.title" = "DISTINCT: remover duplicados"
+"distinct.theory" = """
+Quando várias linhas compartilham um valor, um SELECT comum o repete. O DISTINCT deixa cada resultado diferente uma só vez:
+
+  SELECT category FROM products;            -- uma linha por produto
+  SELECT DISTINCT category FROM products;   -- uma linha por categoria
+
+O DISTINCT vale para a linha inteira: SELECT DISTINCT country, city mantém cada par diferente."""
+"distinct-1.prompt" = "Mostre cada país que tem clientes, uma só vez."
+"distinct-1.hint1" = "Adicione uma palavra-chave logo depois de SELECT."
+"distinct-1.hint2" = "SELECT DISTINCT country FROM customers;"
+"distinct-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"null.title" = "NULL: a ausência de um valor"
+"null.theory" = """
+NULL significa "desconhecido" ou "sem valor". Não é zero nem um texto vazio. Qualquer comparação com NULL dá NULL (não verdadeiro), então isto não encontra nada:
+
+  SELECT name FROM customers WHERE email = NULL;      -- sempre vazio
+
+Use IS NULL e IS NOT NULL:
+
+  SELECT name FROM customers WHERE email IS NULL;
+  SELECT name FROM customers WHERE email IS NOT NULL;"""
+"null-1.prompt" = "Mostre o nome dos clientes que não têm email."
+"null-1.hint1" = "= NULL nunca coincide. Existe um operador especial."
+"null-1.hint2" = "SELECT name FROM customers WHERE email IS NULL;"
+"null-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"null-2.prompt" = "Mostre o nome e o email dos clientes que têm email."
+"null-2.hint1" = "Use IS NOT NULL."
+"null-2.hint2" = "SELECT name, email FROM customers WHERE email IS NOT NULL;"
+"null-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"like.title" = "LIKE: buscar padrões de texto"
+"like.theory" = """
+O LIKE compara texto com um padrão. % corresponde a qualquer quantidade de caracteres (até nenhum) e _ a exatamente um:
+
+  SELECT name FROM customers WHERE name LIKE 'M%';       -- começa com M
+  SELECT name FROM products  WHERE name LIKE '%top';     -- termina em top
+  SELECT name FROM products  WHERE name LIKE '_en%';     -- segunda letra e, terceira n
+
+No SQLite, o LIKE ignora maiúsculas e minúsculas nas letras inglesas comuns."""
+"like-1.prompt" = "Mostre o nome dos clientes cujo nome começa com M."
+"like-1.hint1" = "O padrão é a letra seguida de %."
+"like-1.hint2" = "SELECT name FROM customers WHERE name LIKE 'M%';"
+"like-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"like-2.prompt" = "Mostre o nome dos produtos que contêm as letras \"on\" em qualquer lugar."
+"like-2.hint1" = "Coloque % dos dois lados das letras."
+"like-2.hint2" = "SELECT name FROM products WHERE name LIKE '%on%';"
+"like-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"in-between.title" = "IN e BETWEEN"
+"in-between.theory" = """
+O IN substitui uma cadeia de ORs:
+
+  SELECT name FROM products WHERE category IN ('furniture', 'stationery');
+
+O BETWEEN verifica um intervalo, com as duas pontas incluídas:
+
+  SELECT id FROM orders WHERE ordered_at BETWEEN '2024-01-01' AND '2024-01-31';
+
+As datas são guardadas como texto no formato AAAA-MM-DD, então compará-las como texto as ordena corretamente."""
+"in-1.prompt" = "Mostre o nome e a categoria dos produtos das categorias furniture ou accessories."
+"in-1.hint1" = "Coloque as duas categorias dentro de IN (...)."
+"in-1.hint2" = "SELECT name, category FROM products WHERE category IN ('furniture', 'accessories');"
+"in-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"between-1.prompt" = "Mostre o id e ordered_at dos pedidos feitos de 2024-02-01 a 2024-03-01, ambos os dias incluídos."
+"between-1.hint1" = "BETWEEN já inclui as duas pontas."
+"between-1.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at BETWEEN '2024-02-01' AND '2024-03-01';"
+"between-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"case.title" = "CASE: condições dentro de uma consulta"
+"case.theory" = """
+CASE é o if/else do SQL. O primeiro WHEN verdadeiro decide o valor:
+
+  SELECT name,
+         CASE
+           WHEN price >= 500 THEN 'expensive'
+           WHEN price >= 50  THEN 'medium'
+           ELSE 'cheap'
+         END AS tier
+  FROM products;
+
+Sem ELSE, uma linha que não cumpre nenhum WHEN recebe NULL."""
+"case-1.prompt" = "Mostre o nome de cada produto e uma coluna chamada level: 'out' se o estoque é 0, 'low' se é menor que 20 e 'ok' nos demais casos."
+"case-1.hint1" = "Teste primeiro o caso mais específico: stock = 0."
+"case-1.hint2" = "SELECT name, CASE WHEN stock = 0 THEN 'out' WHEN stock < 20 THEN 'low' ELSE 'ok' END AS level FROM products;"
+"case-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."

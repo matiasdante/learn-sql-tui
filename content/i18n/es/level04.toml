@@ -1,0 +1,111 @@
+"subqueries.title" = "Subconsultas: una consulta dentro de otra"
+"subqueries.theory" = """
+Una subconsulta es un SELECT entre paréntesis que se usa como valor o como lista. Una subconsulta escalar devuelve un único valor:
+
+  SELECT name, price FROM products
+  WHERE price > (SELECT avg(price) FROM products);
+
+Una subconsulta que devuelve una columna puede alimentar un IN:
+
+  SELECT name FROM customers
+  WHERE id IN (SELECT customer_id FROM orders);
+
+La consulta interna se ejecuta primero; la externa usa su resultado."""
+"subq-1.prompt" = "Mostrá el nombre y el precio de los productos que cuestan más que el precio promedio de todos los productos."
+"subq-1.hint1" = "Compará price con (SELECT avg(price) FROM products)."
+"subq-1.hint2" = "SELECT name, price FROM products WHERE price > (SELECT avg(price) FROM products);"
+"subq-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"subq-2.prompt" = "Mostrá el nombre de los clientes que hicieron al menos un pedido."
+"subq-2.hint1" = "id IN (SELECT customer_id FROM orders)."
+"subq-2.hint2" = "SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders);"
+"subq-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"exists-correlated.title" = "EXISTS y subconsultas correlacionadas"
+"exists-correlated.theory" = """
+Una subconsulta correlacionada menciona una columna de la consulta externa, así que se ejecuta una vez por cada fila externa. EXISTS es verdadero cuando la subconsulta devuelve al menos una fila:
+
+  SELECT name FROM customers c
+  WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+Lo que selecciona la subconsulta no importa con EXISTS (SELECT 1 es la costumbre). La correlación también sirve para valores:
+
+  SELECT name, price, category FROM products p
+  WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);
+
+NOT EXISTS conserva las filas sin coincidencia y, a diferencia de NOT IN, es seguro cuando la subconsulta contiene NULL."""
+"exists-1.prompt" = "Usando EXISTS, mostrá el nombre de los clientes que tienen al menos un pedido pending."
+"exists-1.hint1" = "La subconsulta busca pedidos de ese cliente con status = 'pending'."
+"exists-1.hint2" = "SELECT name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id AND o.status = 'pending');"
+"exists-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"exists-1.check2.fail" = "Usá EXISTS como se pidió."
+"corr-1.prompt" = "Mostrá el nombre, la categoría y el precio de los productos que cuestan más que el precio promedio de su propia categoría."
+"corr-1.hint1" = "La subconsulta promedia los productos con category = p.category (la fila externa)."
+"corr-1.hint2" = "SELECT name, category, price FROM products p WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);"
+"corr-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"set-operations.title" = "UNION, INTERSECT y EXCEPT"
+"set-operations.theory" = """
+Las operaciones de conjuntos combinan los resultados de dos SELECT con la misma cantidad de columnas:
+
+  UNION       filas de ambos, sin duplicados (UNION ALL conserva duplicados y es más rápido)
+  INTERSECT   filas que aparecen en los dos
+  EXCEPT      filas del primero que no están en el segundo
+
+  SELECT id FROM customers
+  EXCEPT
+  SELECT customer_id FROM orders;       -- clientes sin pedidos
+
+Solo se permite un ORDER BY, al final de todo."""
+"union-1.prompt" = "Mostrá una sola lista con los nombres de los clientes de UK junto con los nombres de los clientes de Boston."
+"union-1.hint1" = "Dos SELECT unidos por UNION."
+"union-1.hint2" = "SELECT name FROM customers WHERE country = 'UK' UNION SELECT name FROM customers WHERE city = 'Boston';"
+"union-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"union-1.check2.fail" = "Usá UNION como se pidió."
+"intersect-1.prompt" = "Mostrá el customer_id de los clientes que tienen un pedido pending y también un pedido shipped."
+"intersect-1.hint1" = "Un SELECT por estado, unidos por INTERSECT."
+"intersect-1.hint2" = "SELECT customer_id FROM orders WHERE status = 'pending' INTERSECT SELECT customer_id FROM orders WHERE status = 'shipped';"
+"intersect-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"intersect-1.check2.fail" = "Usá INTERSECT como se pidió."
+"except-1.prompt" = "Mostrá el id de los clientes que nunca hicieron un pedido, usando EXCEPT."
+"except-1.hint1" = "Todos los id de clientes EXCEPT los customer_id de orders."
+"except-1.hint2" = "SELECT id FROM customers EXCEPT SELECT customer_id FROM orders;"
+"except-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"except-1.check2.fail" = "Usá EXCEPT como se pidió."
+"cte.title" = "WITH: expresiones de tabla comunes"
+"cte.theory" = """
+Una CTE le da nombre a una subconsulta para que la consulta principal se lea de arriba hacia abajo:
+
+  WITH totals AS (
+    SELECT order_id, sum(quantity) AS items
+    FROM order_items
+    GROUP BY order_id
+  )
+  SELECT order_id, items FROM totals WHERE items > 5;
+
+Pensala como una vista temporal que vive durante una sentencia. Podés definir varias, separadas por comas, y las siguientes pueden usar las anteriores."""
+"cte-1.prompt" = "Usá una cláusula WITH para calcular el total de cada pedido (suma de cantidad por precio) y mostrá los pedidos cuyo total supera 1000, como order_id y total."
+"cte-1.hint1" = "En la CTE: JOIN de order_items con products y GROUP BY order_id. Después filtrá la CTE."
+"cte-1.hint2" = "WITH totals AS (SELECT oi.order_id, sum(oi.quantity * p.price) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY oi.order_id) SELECT order_id, total FROM totals WHERE total > 1000;"
+"cte-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"cte-1.check2.fail" = "Usá una cláusula WITH como se pidió."
+"recursive-cte.title" = "CTE recursivos"
+"recursive-cte.theory" = """
+Un CTE recursivo se llama a sí mismo: una consulta ancla da las primeras filas y una parte recursiva sigue produciendo filas nuevas a partir de las anteriores, hasta que no produce ninguna:
+
+  WITH RECURSIVE count(x) AS (
+    SELECT 1                        -- ancla
+    UNION ALL
+    SELECT x + 1 FROM count         -- parte recursiva
+    WHERE x < 5                     -- el freno
+  )
+  SELECT x FROM count;
+
+Así recorre SQL las jerarquías (jefes y empleados, carpetas) y arma series. Sin el freno la consulta no termina nunca: apretá Ctrl+C para cortarla."""
+"rec-1.prompt" = "Con un CTE recursivo, generá los números del 1 al 10 (una columna)."
+"rec-1.hint1" = "Ancla: SELECT 1. Parte recursiva: x + 1 mientras x < 10."
+"rec-1.hint2" = "WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM n WHERE x < 10) SELECT x FROM n;"
+"rec-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"rec-1.check2.fail" = "Usá WITH RECURSIVE como se pidió."
+"rec-2.prompt" = "Mostrá a Bruno y a todos los que le reportan, directa o indirectamente, con su profundidad (name, depth). Bruno es profundidad 0, sus reportes 1, y así."
+"rec-2.hint1" = "Ancla: Bruno con depth 0. Parte recursiva: empleados cuyo manager_id está en el CTE, depth + 1."
+"rec-2.hint2" = "WITH RECURSIVE team(id, name, depth) AS (SELECT id, name, 0 FROM employees WHERE name = 'Bruno' UNION ALL SELECT e.id, e.name, t.depth + 1 FROM employees e JOIN team t ON e.manager_id = t.id) SELECT name, depth FROM team;"
+"rec-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"rec-2.check2.fail" = "Usá WITH RECURSIVE como se pidió."

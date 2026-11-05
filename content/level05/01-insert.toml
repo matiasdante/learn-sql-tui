@@ -1,0 +1,27 @@
+id = "insert"
+level = 5
+order = 1
+
+[[exercise]]
+id = "insert-1"
+hints = 2
+solution = ["INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT title, done, priority FROM tasks WHERE title = 'Read a book'", rows = [["Read a book", "0", "2"]] },
+  { type = "row_count", table = "tasks", count = 6 },
+]
+
+[[exercise]]
+id = "insert-2"
+hints = 2
+solution = ["INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT title, done, priority FROM tasks WHERE id > 5 ORDER BY title", rows = [["Clean desk", "0", "3"], ["Water plants", "0", "3"]] },
+  { type = "row_count", table = "tasks", count = 7 },
+]

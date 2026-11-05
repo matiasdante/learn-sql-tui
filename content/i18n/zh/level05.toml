@@ -1,0 +1,82 @@
+"insert.title" = "INSERT：添加行"
+"insert.theory" = """
+INSERT 用来添加行。先写列名，再按相同顺序给出值：
+
+  INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);
+
+省略的列会使用 DEFAULT（或 NULL，或 INTEGER PRIMARY KEY 的下一个编号）。一次插入多行：
+
+  INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');
+
+也可以插入查询的结果：INSERT INTO archive SELECT * FROM tasks WHERE done = 1;
+
+这一级会修改数据：答案不正确时，按 F5 会把 tasks 表恢复原状。"""
+"insert-1.prompt" = "向 tasks 表添加任务 'Read a book'，优先级为 2。"
+"insert-1.hint1" = "INSERT INTO tasks (title, priority) VALUES (...)。"
+"insert-1.hint2" = "INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);"
+"insert-1.check1.fail" = "还没有优先级为 2（且 done = 0）的任务 'Read a book'。"
+"insert-1.check2.fail" = "表中应当恰好多出一行。"
+"insert-2.prompt" = "用一条 INSERT 添加两个任务：'Water plants' 和 'Clean desk'，其他列使用默认值。"
+"insert-2.hint1" = "在 VALUES 后写两行，用逗号分隔，并且只填 title 列。"
+"insert-2.hint2" = "INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');"
+"insert-2.check1.fail" = "缺少这两个新任务，或者它们没有使用默认值 done = 0 和 priority = 3。"
+"insert-2.check2.fail" = "表中应当恰好多出两行。"
+"update.title" = "UPDATE：修改行"
+"update.theory" = """
+UPDATE 修改满足 WHERE 条件的行的某些列：
+
+  UPDATE tasks SET done = 1 WHERE title = 'Pay rent';
+  UPDATE tasks SET priority = priority + 1, done = 0 WHERE id = 3;
+
+注意：没有 WHERE 时，UPDATE 会修改表里的每一行。执行重要的 UPDATE 之前，先用同样的 WHERE 跑一个 SELECT，看看会影响哪些行。"""
+"update-1.prompt" = "把任务 'Pay rent' 标记为已完成（done = 1），不要改动其他任务。"
+"update-1.hint1" = "UPDATE tasks SET done = 1 WHERE ..."
+"update-1.hint2" = "UPDATE tasks SET done = 1 WHERE title = 'Pay rent';"
+"update-1.check1.fail" = "'Pay rent' 还没有被标记为已完成。"
+"update-1.check2.fail" = "现在应该恰好有三个任务已完成：原来的两个加上 Pay rent。"
+"update-2.prompt" = "把所有尚未完成的任务的优先级设为 1，不要改动已完成的任务。"
+"update-2.hint1" = "WHERE 决定哪些行会被修改：done = 0。"
+"update-2.hint2" = "UPDATE tasks SET priority = 1 WHERE done = 0;"
+"update-2.check1.fail" = "所有未完成的任务的优先级都必须是 1。"
+"update-2.check2.fail" = "已完成的任务必须保持原来的优先级。"
+"delete.title" = "DELETE：删除行"
+"delete.theory" = """
+DELETE 删除满足 WHERE 条件的行：
+
+  DELETE FROM tasks WHERE done = 1;
+
+警告与 UPDATE 相同：不带 WHERE 的 DELETE FROM tasks; 会清空整张表。表本身还在；删除表要用 DROP TABLE（第 6 级）。
+
+没有“撤销”按钮。第 7 级会学到事务，可以先试着 DELETE，出错了再 ROLLBACK。"""
+"delete-1.prompt" = "删除所有已完成的任务，未完成的任务必须保留。"
+"delete-1.hint1" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.hint2" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.check1.fail" = "仍然有 done = 1 的任务。"
+"delete-1.check2.fail" = "三个未完成的任务必须仍留在表中。"
+"upsert.title" = "UPSERT：插入或更新"
+"upsert.theory" = """
+如果一行可能存在也可能不存在怎么办？ON CONFLICT 能把本来会失败（键重复）的 INSERT 变成更新：
+
+  INSERT INTO counters (name, value) VALUES ('visits', 1)
+  ON CONFLICT (name) DO UPDATE SET value = value + 1;
+
+如果 'visits' 不存在就以 1 插入；存在的话，它的值加 1。在 DO UPDATE 里，excluded.value 是你尝试插入的值。用 DO NOTHING 则直接跳过重复项。冲突目标（name）必须是 PRIMARY KEY 或 UNIQUE 列。"""
+"upsert-1.prompt" = "在 counters 表中再记录一次访问：插入 ('visits', 1)，由于 'visits' 已存在，用 ON CONFLICT 把它的值加 1，最终应为 11。"
+"upsert-1.hint1" = "INSERT ... ON CONFLICT (name) DO UPDATE SET value = value + 1。"
+"upsert-1.hint2" = "INSERT INTO counters (name, value) VALUES ('visits', 1) ON CONFLICT (name) DO UPDATE SET value = value + 1;"
+"upsert-1.check1.fail" = "计数器 'visits' 的值应为 11。"
+"upsert-1.check2.fail" = "请按要求使用 INSERT ... ON CONFLICT。"
+"returning.title" = "RETURNING：取回被修改的行"
+"returning.theory" = """
+INSERT、UPDATE 和 DELETE 可以用 RETURNING 把它们处理过的行直接返回，不需要再查一次：
+
+  INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;
+  UPDATE tasks SET done = 1 WHERE priority = 1 RETURNING id, title;
+  DELETE FROM tasks WHERE done = 1 RETURNING title;
+
+想知道数据库为新行生成的 id，这是最干净的方式。结果会像 SELECT 一样显示成表格。"""
+"returning-1.prompt" = "添加任务 'Plan trip'，并让同一条语句返回数据库为它生成的 id。"
+"returning-1.hint1" = "在 INSERT 末尾加上 RETURNING id。"
+"returning-1.hint2" = "INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;"
+"returning-1.check1.fail" = "任务 'Plan trip' 还没有出现在表中。"
+"returning-1.check2.fail" = "请按要求在 INSERT 中使用 RETURNING。"

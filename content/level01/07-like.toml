@@ -1,0 +1,25 @@
+id = "like"
+level = 1
+order = 7
+
+[[exercise]]
+id = "like-1"
+hints = 2
+solution = ["SELECT name FROM customers WHERE name LIKE 'M%';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers WHERE name LIKE 'M%'" },
+]
+
+[[exercise]]
+id = "like-2"
+hints = 2
+solution = ["SELECT name FROM products WHERE name LIKE '%on%';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM products WHERE name LIKE '%on%'" },
+]

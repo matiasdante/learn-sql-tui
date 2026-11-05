@@ -1,0 +1,153 @@
+"create-table.title" = "CREATE TABLE"
+"create-table.theory" = """
+CREATE TABLE defines a table: a name, then each column with its type and constraints:
+
+  CREATE TABLE books (
+    id    INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    year  INTEGER
+  );
+
+PRIMARY KEY identifies each row (an INTEGER PRIMARY KEY fills itself with 1, 2, 3...). NOT NULL forbids missing values. DEFAULT gives a value when the INSERT leaves the column out. CHECK rejects values that break a rule:
+
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned'))
+
+Use .schema books to see how a table was created."""
+"create-1.prompt" = "Create a table books with: id (INTEGER, primary key), title (TEXT, required) and year (INTEGER)."
+"create-1.hint1" = "Required means NOT NULL."
+"create-1.hint2" = "CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, year INTEGER);"
+"create-1.check1.fail" = "The table books does not exist yet."
+"create-1.check2.fail" = "books.id must be an INTEGER PRIMARY KEY."
+"create-1.check3.fail" = "books.title must be TEXT NOT NULL."
+"create-1.check4.fail" = "books.year must be an INTEGER column."
+"create-2.prompt" = "Create a table members with: name (TEXT, required), status (TEXT, required, default 'active', and only 'active' or 'banned' allowed with a CHECK) and points (INTEGER, default 0)."
+"create-2.hint1" = "status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned'))."
+"create-2.hint2" = "CREATE TABLE members (name TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned')), points INTEGER DEFAULT 0);"
+"create-2.check1.fail" = "The table members does not exist yet."
+"create-2.check2.fail" = "members.name must be NOT NULL."
+"create-2.check3.fail" = "members.status needs DEFAULT 'active'."
+"create-2.check4.fail" = "members.status must be NOT NULL."
+"create-2.check5.fail" = "members.points needs DEFAULT 0."
+"create-2.check6.fail" = "Add a CHECK constraint for the status."
+"types-strict.title" = "Types and STRICT tables"
+"types-strict.theory" = """
+SQLite is flexible about types: a column has an affinity (a preferred type), not a rule. You can store the text 'hello' in an INTEGER column and it will be accepted. The storage classes are NULL, INTEGER, REAL, TEXT and BLOB; typeof(x) tells which one a value has.
+
+To get strict checking like other databases, add STRICT after the closing parenthesis:
+
+  CREATE TABLE readings (
+    sensor TEXT,
+    value  REAL
+  ) STRICT;
+
+A STRICT table accepts only INT, INTEGER, REAL, TEXT, BLOB and ANY as column types, and rejects values that do not fit. Try it: INSERT INTO readings VALUES ('a', 'not a number'); fails."""
+"strict-1.prompt" = "Create a STRICT table readings with a TEXT column sensor and a REAL column value."
+"strict-1.hint1" = "The keyword STRICT goes after the closing parenthesis."
+"strict-1.hint2" = "CREATE TABLE readings (sensor TEXT, value REAL) STRICT;"
+"strict-1.check1.fail" = "The table readings does not exist yet."
+"strict-1.check2.fail" = "readings.sensor must be TEXT."
+"strict-1.check3.fail" = "readings.value must be REAL."
+"strict-1.check4.fail" = "The table must be declared STRICT."
+"constraints.title" = "Constraints: UNIQUE, NOT NULL, CHECK"
+"constraints.theory" = """
+Constraints make the database refuse bad data, whatever program writes to it:
+
+  NOT NULL    the value is required
+  UNIQUE      no two rows may repeat the value (a unique index is created for it)
+  CHECK(...)  the condition must be true
+  PRIMARY KEY unique and identifies the row
+
+  CREATE TABLE users (
+    id    INTEGER PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    age   INTEGER CHECK (age >= 0)
+  );
+
+A violating INSERT or UPDATE fails with an error such as UNIQUE constraint failed: users.email, and nothing is written. Rules enforced here protect the data from every application."""
+"constraints-1.prompt" = "Create a table users with: id (INTEGER primary key), email (TEXT, required and unique) and age (INTEGER, only 0 or more allowed with a CHECK)."
+"constraints-1.hint1" = "email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0)."
+"constraints-1.hint2" = "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0));"
+"constraints-1.check1.fail" = "The table users does not exist yet."
+"constraints-1.check2.fail" = "users.id must be the primary key."
+"constraints-1.check3.fail" = "users.email must be NOT NULL."
+"constraints-1.check4.fail" = "users.email must be UNIQUE."
+"constraints-1.check5.fail" = "Add a CHECK constraint on age."
+"foreign-keys.title" = "Foreign keys and ON DELETE"
+"foreign-keys.theory" = """
+A foreign key makes a column point to the primary key of another table, so you cannot have a post whose author does not exist:
+
+  CREATE TABLE posts (
+    id        INTEGER PRIMARY KEY,
+    author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
+    title     TEXT
+  );
+
+ON DELETE says what happens when the parent row is deleted:
+  NO ACTION / RESTRICT   refuse the delete (default)
+  CASCADE                delete the children too
+  SET NULL               set the child column to NULL
+  SET DEFAULT            set it to its default
+
+Important: SQLite only enforces foreign keys when PRAGMA foreign_keys = ON (level 7)."""
+"fk-1.prompt" = "The table authors exists. Create a table posts with id (INTEGER primary key), author_id (INTEGER, required, referencing authors(id) so that deleting an author deletes their posts) and title (TEXT)."
+"fk-1.hint1" = "author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE."
+"fk-1.hint2" = "CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE, title TEXT);"
+"fk-1.check1.fail" = "The table posts does not exist yet."
+"fk-1.check2.fail" = "posts.author_id must be NOT NULL."
+"fk-1.check3.fail" = "posts.author_id must reference authors(id)."
+"fk-1.check4.fail" = "Add ON DELETE CASCADE to the foreign key."
+"alter-table.title" = "ALTER TABLE"
+"alter-table.theory" = """
+ALTER TABLE changes a table that already holds data:
+
+  ALTER TABLE tasks ADD COLUMN due_date TEXT;          new column (existing rows get NULL)
+  ALTER TABLE tasks RENAME COLUMN title TO name;
+  ALTER TABLE tasks RENAME TO todos;
+  ALTER TABLE tasks DROP COLUMN priority;
+
+ADD COLUMN has limits: a new NOT NULL column needs a DEFAULT, and it cannot be PRIMARY KEY or UNIQUE. For bigger changes, create the new table, copy the data with INSERT ... SELECT, drop the old one and rename the new one."""
+"alter-1.prompt" = "Add a TEXT column called due_date to the tasks table. Keep its 5 rows."
+"alter-1.hint1" = "ALTER TABLE tasks ADD COLUMN ..."
+"alter-1.hint2" = "ALTER TABLE tasks ADD COLUMN due_date TEXT;"
+"alter-1.check1.fail" = "tasks needs a TEXT column called due_date."
+"alter-1.check2.fail" = "The 5 original rows must stay."
+"alter-2.prompt" = "Rename the column title of tasks to name, and then rename the table tasks to todos."
+"alter-2.hint1" = "Two statements: RENAME COLUMN ... TO ... and then RENAME TO ..."
+"alter-2.hint2" = "ALTER TABLE tasks RENAME COLUMN title TO name;\nALTER TABLE tasks RENAME TO todos;"
+"alter-2.check1.fail" = "The table must be called todos."
+"alter-2.check2.fail" = "The old name tasks must not exist any more."
+"alter-2.check3.fail" = "The column must be called name."
+"alter-2.check4.fail" = "The 5 rows must be kept."
+"drop.title" = "DROP: removing tables"
+"drop.theory" = """
+DROP TABLE removes a table together with all its rows, indexes and triggers:
+
+  DROP TABLE counters;
+  DROP TABLE IF EXISTS counters;     -- no error when it is already gone
+
+Also DROP VIEW, DROP INDEX and DROP TRIGGER. There is no undo (apart from a transaction not yet committed, or a backup). If other tables reference it with foreign keys and PRAGMA foreign_keys is ON, SQLite checks that the drop does not leave orphans."""
+"drop-1.prompt" = "Delete the counters table completely. The tasks table must stay."
+"drop-1.hint1" = "DROP TABLE counters;"
+"drop-1.hint2" = "DROP TABLE counters;"
+"drop-1.check1.fail" = "The table counters still exists."
+"drop-1.check2.fail" = "Do not drop tasks."
+"generated-columns.title" = "Generated columns"
+"generated-columns.theory" = """
+A generated column is computed from other columns of the same row, so it can never go out of sync:
+
+  CREATE TABLE items (
+    price REAL,
+    qty   INTEGER,
+    total REAL GENERATED ALWAYS AS (price * qty) VIRTUAL
+  );
+
+VIRTUAL columns are calculated when read; STORED columns are saved on disk when the row is written (and can be indexed). You cannot INSERT into a generated column. ALTER TABLE ... ADD COLUMN can add VIRTUAL ones:
+
+  ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);
+
+Generated columns are hidden from SELECT * in some cases; ask for them by name."""
+"generated-1.prompt" = "The table items has price and qty. Add a generated column total that always equals price * qty."
+"generated-1.hint1" = "ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"
+"generated-1.hint2" = "ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"
+"generated-1.check1.fail" = "items needs a generated column called total."
+"generated-1.check2.fail" = "total must equal price * qty for every row."

@@ -1,0 +1,115 @@
+[[achievement]]
+id = "first-query"
+condition = { type = "exercise_done", exercise = "select-1" }
+
+[[achievement]]
+id = "unknown-hunter"
+condition = { type = "exercise_done", exercise = "null-1" }
+
+[[achievement]]
+id = "level-1-done"
+condition = { type = "level_done", level = 1 }
+
+[[achievement]]
+id = "level-1-no-hints"
+condition = { type = "level_no_hints", level = 1 }
+
+[[achievement]]
+id = "grouped-up"
+condition = { type = "exercise_done", exercise = "having-1" }
+
+[[achievement]]
+id = "level-2-done"
+condition = { type = "level_done", level = 2 }
+
+[[achievement]]
+id = "level-2-no-hints"
+condition = { type = "level_no_hints", level = 2 }
+
+[[achievement]]
+id = "first-join"
+condition = { type = "exercise_done", exercise = "join-1" }
+
+[[achievement]]
+id = "the-lonely-ones"
+condition = { type = "exercise_done", exercise = "left-2" }
+
+[[achievement]]
+id = "level-3-done"
+condition = { type = "level_done", level = 3 }
+
+[[achievement]]
+id = "level-3-no-hints"
+condition = { type = "level_no_hints", level = 3 }
+
+[[achievement]]
+id = "rabbit-hole"
+condition = { type = "exercise_done", exercise = "rec-2" }
+
+[[achievement]]
+id = "level-4-done"
+condition = { type = "level_done", level = 4 }
+
+[[achievement]]
+id = "level-4-no-hints"
+condition = { type = "level_no_hints", level = 4 }
+
+[[achievement]]
+id = "data-in"
+condition = { type = "exercise_done", exercise = "insert-1" }
+
+[[achievement]]
+id = "upsert-ace"
+condition = { type = "exercise_done", exercise = "upsert-1" }
+
+[[achievement]]
+id = "level-5-done"
+condition = { type = "level_done", level = 5 }
+
+[[achievement]]
+id = "level-5-no-hints"
+condition = { type = "level_no_hints", level = 5 }
+
+[[achievement]]
+id = "table-builder"
+condition = { type = "exercise_done", exercise = "create-1" }
+
+[[achievement]]
+id = "level-6-done"
+condition = { type = "level_done", level = 6 }
+
+[[achievement]]
+id = "undo-button"
+condition = { type = "exercise_done", exercise = "tx-2" }
+
+[[achievement]]
+id = "level-7-done"
+condition = { type = "level_done", level = 7 }
+
+[[achievement]]
+id = "faster"
+condition = { type = "exercise_done", exercise = "explain-2" }
+
+[[achievement]]
+id = "level-8-done"
+condition = { type = "level_done", level = 8 }
+
+[[achievement]]
+id = "window-watcher"
+condition = { type = "exercise_done", exercise = "win-1" }
+
+[[achievement]]
+id = "on-autopilot"
+condition = { type = "exercise_done", exercise = "trigger-1" }
+
+[[achievement]]
+id = "level-9-done"
+condition = { type = "level_done", level = 9 }
+
+[[achievement]]
+id = "safe-and-sound"
+condition = { type = "exercise_done", exercise = "vacuum-1" }
+
+[[achievement]]
+id = "level-10-done"
+condition = { type = "level_done", level = 10 }

@@ -1,0 +1,26 @@
+id = "explain"
+level = 8
+order = 4
+
+[[exercise]]
+id = "explain-1"
+hints = 2
+solution = ["EXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "ran", any = ["EXPLAIN QUERY PLAN"] },
+]
+
+[[exercise]]
+id = "explain-2"
+hints = 2
+solution = ["CREATE INDEX idx_orders_customer ON orders (customer_id);\nEXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT count(*) FROM pragma_index_list('orders') il JOIN pragma_index_info(il.name) ii WHERE ii.name = 'customer_id'", rows = [["1"]] },
+  { type = "ran", any = ["EXPLAIN QUERY PLAN"] },
+]

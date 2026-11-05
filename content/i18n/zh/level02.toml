@@ -1,0 +1,125 @@
+"text-functions.title" = "文本函数"
+"text-functions.theory" = """
+函数在查询中转换一个值。处理文本最常用的有：
+
+  upper(x), lower(x)        转换大小写
+  length(x)                 字符个数
+  substr(x, 起点, 长度)      截取一段文本（第一个字符的位置是 1）
+  replace(x, 旧, 新)         替换所有出现的位置
+  trim(x)                   去掉两端的空格
+
+  SELECT upper(name) AS shout, length(name) AS size FROM customers;"""
+"textfn-1.prompt" = "显示每位客户姓名的大写形式（列 upper_name）和字符数（列 name_length）。"
+"textfn-1.hint1" = "两个函数：upper() 和 length()。"
+"textfn-1.hint2" = "SELECT upper(name) AS upper_name, length(name) AS name_length FROM customers;"
+"textfn-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"textfn-2.prompt" = "显示每个商品名称的前 3 个字母（小写），列名为 code。"
+"textfn-2.hint1" = "substr(name, 1, 3) 取前三个字符；再用 lower() 包起来。"
+"textfn-2.hint2" = "SELECT lower(substr(name, 1, 3)) AS code FROM products;"
+"textfn-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"number-functions.title" = "数值函数"
+"number-functions.theory" = """
+数值也有自己的函数：
+
+  round(x, n)        四舍五入到 n 位小数（round(x) 四舍五入为整数）
+  abs(x)             去掉符号
+  max(a, b), min(a, b)   传入两个或更多参数时，取其中一个值
+
+  SELECT name, round(price * 1.21, 1) AS with_tax FROM products;
+
+两个整数相除是整数除法：7 / 2 等于 3。写成 7 / 2.0 才得到 3.5。"""
+"numfn-1.prompt" = "显示每个商品的名称及含 21% 税的价格，四舍五入到 1 位小数，列名为 price_with_tax。"
+"numfn-1.hint1" = "乘以 1.21，再用 round(..., 1) 包起来。"
+"numfn-1.hint2" = "SELECT name, round(price * 1.21, 1) AS price_with_tax FROM products;"
+"numfn-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"date-functions.title" = "日期函数"
+"date-functions.theory" = """
+SQLite 没有日期类型：日期是形如 2024-03-15 的文本。日期函数就是处理这种文本：
+
+  date('2024-03-15', '+1 month')       2024-04-15
+  strftime('%Y-%m', '2024-03-15')       2024-03   （%Y 年，%m 月，%d 日）
+  date('now')                           今天
+
+  SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;
+
+由于 ISO 日期按文本就能正确排序，WHERE ordered_at >= '2024-03-01' 同样可行。"""
+"datefn-1.prompt" = "显示每个订单的 id，以及其日期的年月（如 2024-02），列名为 month。"
+"datefn-1.hint1" = "strftime('%Y-%m', ...) 把日期格式化为年-月。"
+"datefn-1.hint2" = "SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;"
+"datefn-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"datefn-2.prompt" = "显示在 2024-03-31 之前 30 天内下的订单的 id 和 ordered_at（从 30 天前当天算起，含当天）。"
+"datefn-2.hint1" = "date('2024-03-31', '-30 days') 给出起始日期。"
+"datefn-2.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at >= date('2024-03-31', '-30 days');"
+"datefn-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"aggregates.title" = "COUNT、SUM、AVG、MIN、MAX"
+"aggregates.theory" = """
+聚合函数把多行归并为一个值：
+
+  SELECT count(*) FROM orders;              行数
+  SELECT count(email) FROM customers;       email 不为 NULL 的行数
+  SELECT count(DISTINCT country) FROM customers;
+  SELECT sum(stock), avg(price), min(price), max(price) FROM products;
+
+count(*) 统计行数；count(列) 会跳过 NULL。其他函数同样忽略 NULL。"""
+"agg-1.prompt" = "在一行中显示客户总数（total）以及其中有 email 的客户数（with_email）。"
+"agg-1.hint1" = "count(*) 统计所有行，count(email) 只统计不为 NULL 的行。"
+"agg-1.hint2" = "SELECT count(*) AS total, count(email) AS with_email FROM customers;"
+"agg-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"agg-2.prompt" = "显示商品的最低价（min_price）、最高价（max_price）和平均价（avg_price）。"
+"agg-2.hint1" = "一个 SELECT 里三个聚合：min()、max() 和 avg()。"
+"agg-2.hint2" = "SELECT min(price) AS min_price, max(price) AS max_price, avg(price) AS avg_price FROM products;"
+"agg-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"group-by.title" = "GROUP BY：每组一个结果"
+"group-by.theory" = """
+GROUP BY 把行分成若干组，聚合函数对每组各计算一次：
+
+  SELECT status, count(*) AS orders FROM orders GROUP BY status;
+  SELECT category, avg(price) AS avg_price FROM products GROUP BY category;
+
+SELECT 中的每一列要么出现在 GROUP BY 中，要么放在聚合函数里。WHERE 在分组之前过滤行。"""
+"group-1.prompt" = "显示每种订单状态（status）以及拥有该状态的订单数（列 n）。"
+"group-1.hint1" = "按 status 分组，统计每组的行数。"
+"group-1.hint2" = "SELECT status, count(*) AS n FROM orders GROUP BY status;"
+"group-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"group-2.prompt" = "显示每个商品类别（category）及其商品的平均价格（avg_price）。"
+"group-2.hint1" = "按 category 分组并使用 avg(price)。"
+"group-2.hint2" = "SELECT category, avg(price) AS avg_price FROM products GROUP BY category;"
+"group-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"having.title" = "HAVING：筛选分组"
+"having.theory" = """
+WHERE 不能使用聚合函数，因为它在分组产生之前执行。要过滤分组，请使用 HAVING：
+
+  SELECT category, count(*) AS n
+  FROM products
+  GROUP BY category
+  HAVING count(*) > 2;
+
+执行顺序是：FROM、WHERE（行）、GROUP BY、HAVING（组）、SELECT、ORDER BY、LIMIT。"""
+"having-1.prompt" = "显示商品数超过 2 个的类别，并给出商品数量（n）。"
+"having-1.hint1" = "按 category 分组，再用 HAVING count(*) > 2 保留符合条件的组。"
+"having-1.hint2" = "SELECT category, count(*) AS n FROM products GROUP BY category HAVING count(*) > 2;"
+"having-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"having-2.prompt" = "在 order_items 中，显示每个 product_id 及其销售总量（total），只保留总量大于 5 的商品。"
+"having-2.hint1" = "按商品求 sum(quantity)，再对这个和使用 HAVING。"
+"having-2.hint2" = "SELECT product_id, sum(quantity) AS total FROM order_items GROUP BY product_id HAVING sum(quantity) > 5;"
+"having-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"coalesce-cast.title" = "COALESCE 和 CAST"
+"coalesce-cast.theory" = """
+coalesce(a, b, ...) 返回第一个不为 NULL 的值，这是设置默认值的标准做法：
+
+  SELECT name, coalesce(email, 'no email') AS contact FROM customers;
+
+CAST(x AS 类型) 把值转换为 INTEGER、REAL 或 TEXT：
+
+  SELECT CAST(price AS INTEGER) FROM products;     -- 3.5 变成 3（小数部分被截掉）
+  SELECT CAST(42 AS TEXT) || ' items';
+
+相关函数：ifnull(a, b) 是只有两个参数的 coalesce，nullif(a, b) 在 a = b 时返回 NULL。"""
+"coalesce-1.prompt" = "显示每位客户的姓名及其 email；没有 email 时显示文本 unknown（列名 contact）。"
+"coalesce-1.hint1" = "coalesce(email, 'unknown') 会选取第一个不为 NULL 的值。"
+"coalesce-1.hint2" = "SELECT name, coalesce(email, 'unknown') AS contact FROM customers;"
+"coalesce-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"cast-1.prompt" = "显示每个商品的名称及用 CAST 转为整数后的价格（列名 whole_price）。"
+"cast-1.hint1" = "CAST(price AS INTEGER)。"
+"cast-1.hint2" = "SELECT name, CAST(price AS INTEGER) AS whole_price FROM products;"
+"cast-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"

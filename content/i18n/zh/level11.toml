@@ -1,0 +1,59 @@
+"dialects.title" = "PostgreSQL、MySQL 与其他方言"
+"dialects.theory" = """
+你练习过的内容在 SQLite 中都能运行。SQL 的核心（SELECT、JOIN、GROUP BY、子查询、CTE、窗口函数）在 PostgreSQL、MySQL/MariaDB、SQL Server 和 Oracle 中是通用的，但各家都有自己的方言。你最先会遇到的差异：
+
+  自增主键      SQLite INTEGER PRIMARY KEY · PostgreSQL GENERATED ... AS IDENTITY（或 SERIAL）· MySQL AUTO_INCREMENT
+  限制行数      LIMIT 10（SQLite、PostgreSQL、MySQL）· TOP 10（SQL Server）· FETCH FIRST 10 ROWS ONLY（标准、Oracle）
+  连接文本      'a' || 'b'（SQLite、PostgreSQL）· CONCAT('a', 'b')（MySQL、SQL Server）
+  标识符引号    "name"（标准、SQLite、PostgreSQL）· `name`（MySQL）· [name]（SQL Server）
+  Upsert        ON CONFLICT DO UPDATE（SQLite、PostgreSQL）· ON DUPLICATE KEY UPDATE（MySQL）
+  类型          PostgreSQL 和 MySQL 会强制检查列类型（BOOLEAN、DATE、TIMESTAMP、JSONB、UUID……）；SQLite 不会，除非表是 STRICT
+  日期          SQLite 用 strftime(...) · PostgreSQL 用 to_char(...)、date_trunc(...) · MySQL 用 DATE_FORMAT(...)
+  不区分大小写  PostgreSQL 用 ILIKE · MySQL 的 LIKE 取决于排序规则
+
+另外，PostgreSQL 和 MySQL 是服务器：程序通过网络、用用户名和密码连接，而且可以同时有很多个连接。SQLite 是读取一个文件的库。按需求选择引擎：本地应用、测试和小型网站用 SQLite；很多客户端同时写入时用 PostgreSQL 或 MySQL。
+
+本程序只运行 SQLite，所以这里没有练习。"""
+"grant-revoke.title" = "GRANT 与 REVOKE：权限"
+"grant-revoke.theory" = """
+服务器型数据库有用户和角色，并决定每个人能做什么。GRANT 授予权限，REVOKE 收回权限（PostgreSQL 语法）：
+
+  CREATE ROLE analyst LOGIN PASSWORD '...';
+  GRANT SELECT ON orders, customers TO analyst;     -- 只读
+  GRANT INSERT, UPDATE ON orders TO app_backend;
+  REVOKE UPDATE ON orders FROM app_backend;
+
+遵循最小权限原则：每个程序和每个人只获得所需的权限。Web 应用不应该以数据库所有者的身份连接，报表工具只应读取，日常工作里没人需要 DROP。角色可以让你一次性授权给一个组（GRANT analyst TO ana）。MySQL 有同样的 GRANT/REVOKE 语句，细节略有不同。
+
+SQLite 没有用户，也没有 GRANT：能打开文件的人就能做任何事。保护来自操作系统（文件权限）和你的应用。这就是本沙盒限制可访问文件范围的原因。"""
+"isolation.title" = "隔离级别与并发"
+"isolation.theory" = """
+多个事务同时运行时，隔离级别决定了一个事务能看到其他事务的哪些内容。标准按允许出现的异常来定义级别：
+
+  脏读          读到另一个事务尚未提交的数据
+  不可重复读    两次读取同一行，却得到不同的值
+  幻读          两次执行同一个查询，得到不同的行
+
+  READ UNCOMMITTED   三种都允许
+  READ COMMITTED     没有脏读（PostgreSQL 的默认级别）
+  REPEATABLE READ    没有脏读和不可重复读（MySQL InnoDB 的默认级别）
+  SERIALIZABLE       就像事务一个接一个地执行
+
+隔离级别越高越安全，但事务可能要等待（锁），或者失败后需要重试。两个事务互相等待会造成死锁，数据库会中止其中一个。
+
+SQLite 更简单：事务是 SERIALIZABLE 的，同一时间只有一个写入者，如果启用 PRAGMA journal_mode = WAL，写入期间读取者仍可工作。第二个写入者在超时后会收到 SQLITE_BUSY（见 PRAGMA busy_timeout）。无论哪种引擎，都要让写事务尽量短。"""
+"sql-injection.title" = "SQL 注入与参数化查询"
+"sql-injection.theory" = """
+当程序把用户输入的文本直接拼接进查询语句时，就会发生 SQL 注入：
+
+  query = "SELECT * FROM users WHERE name = '" + name + "'"
+
+如果 name 是   x' OR '1'='1   最终的 SQL 就是   SELECT * FROM users WHERE name = 'x' OR '1'='1'   会返回所有用户。如果是   x'; DROP TABLE users; --   攻击者就能执行任何想要的语句。它至今仍是最常见、代价最高的漏洞之一。
+
+解决办法是参数化（预编译）查询：SQL 文本和值分开传递，所以值永远不会变成代码。
+
+  SELECT * FROM users WHERE name = ?          -- SQLite、MySQL
+  SELECT * FROM users WHERE name = $1         -- PostgreSQL
+  cursor.execute("SELECT * FROM users WHERE name = ?", (name,))
+
+规则：绝不要把用户输入拼接或格式化进 SQL（包括 f-string 和字符串模板）；使用驱动或 ORM 提供的占位符；占位符不能代替表名或列名，所以要对照固定列表检查它们；用权限最小的用户连接数据库；在入口处验证输入。本程序也是同样的思路：文件和扩展由引擎来限制，而不是相信你输入的内容。"""

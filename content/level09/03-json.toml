@@ -1,0 +1,25 @@
+id = "json"
+level = 9
+order = 3
+
+[[exercise]]
+id = "json-1"
+hints = 2
+solution = ["SELECT id, json_extract(payload, '$.user') AS user FROM events;"]
+setup = [
+  { do = "sql", script = "CREATE TABLE events (id INTEGER PRIMARY KEY, payload TEXT NOT NULL);\nINSERT INTO events VALUES\n  (1, '{\"user\":\"ada\",\"action\":\"login\",\"tags\":[\"web\",\"mobile\"]}'),\n  (2, '{\"user\":\"grace\",\"action\":\"logout\",\"tags\":[]}'),\n  (3, '{\"user\":\"ada\",\"action\":\"purchase\",\"amount\":42.5,\"tags\":[\"web\"]}');" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT id, json_extract(payload, '$.user') AS user FROM events" },
+]
+
+[[exercise]]
+id = "json-2"
+hints = 2
+solution = ["SELECT e.id, t.value AS tag FROM events e, json_each(e.payload, '$.tags') AS t;"]
+setup = [
+  { do = "sql", script = "CREATE TABLE events (id INTEGER PRIMARY KEY, payload TEXT NOT NULL);\nINSERT INTO events VALUES\n  (1, '{\"user\":\"ada\",\"action\":\"login\",\"tags\":[\"web\",\"mobile\"]}'),\n  (2, '{\"user\":\"grace\",\"action\":\"logout\",\"tags\":[]}'),\n  (3, '{\"user\":\"ada\",\"action\":\"purchase\",\"amount\":42.5,\"tags\":[\"web\"]}');" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT e.id, t.value AS tag FROM events e, json_each(e.payload, '$.tags') AS t" },
+]

@@ -1,0 +1,14 @@
+id = "types-strict"
+level = 6
+order = 2
+
+[[exercise]]
+id = "strict-1"
+hints = 2
+solution = ["CREATE TABLE readings (sensor TEXT, value REAL) STRICT;"]
+checks = [
+  { type = "table_exists", name = "readings" },
+  { type = "column", table = "readings", name = "sensor", data_type = "TEXT" },
+  { type = "column", table = "readings", name = "value", data_type = "REAL" },
+  { type = "query_equals", sql = "SELECT strict FROM pragma_table_list WHERE name = 'readings'", rows = [["1"]] },
+]

@@ -1,0 +1,59 @@
+"dialects.title" = "PostgreSQL, MySQL e outros dialetos"
+"dialects.theory" = """
+Tudo o que você praticou funciona no SQLite. O núcleo do SQL (SELECT, JOIN, GROUP BY, subconsultas, CTEs, funções de janela) é compartilhado por PostgreSQL, MySQL/MariaDB, SQL Server e Oracle, mas cada um tem seu próprio dialeto. As diferenças que você encontrará primeiro:
+
+  Chave autonumérica  SQLite INTEGER PRIMARY KEY · PostgreSQL GENERATED ... AS IDENTITY (ou SERIAL) · MySQL AUTO_INCREMENT
+  Limitar linhas      LIMIT 10 (SQLite, PostgreSQL, MySQL) · TOP 10 (SQL Server) · FETCH FIRST 10 ROWS ONLY (padrão, Oracle)
+  Unir texto          'a' || 'b' (SQLite, PostgreSQL) · CONCAT('a', 'b') (MySQL, SQL Server)
+  Nomes entre aspas   "name" (padrão, SQLite, PostgreSQL) · `name` (MySQL) · [name] (SQL Server)
+  Upsert              ON CONFLICT DO UPDATE (SQLite, PostgreSQL) · ON DUPLICATE KEY UPDATE (MySQL)
+  Tipos               PostgreSQL e MySQL exigem os tipos de coluna (BOOLEAN, DATE, TIMESTAMP, JSONB, UUID...); o SQLite não, a menos que a tabela seja STRICT
+  Datas               strftime(...) no SQLite · to_char(...), date_trunc(...) no PostgreSQL · DATE_FORMAT(...) no MySQL
+  Sem diferenciar maiúsculas  ILIKE no PostgreSQL · LIKE depende do collation no MySQL
+
+Além disso, PostgreSQL e MySQL são servidores: os programas se conectam pela rede com um usuário e uma senha, muitos ao mesmo tempo. O SQLite é uma biblioteca que lê um arquivo. Escolha o motor conforme o trabalho: SQLite para apps locais, testes e sites pequenos; PostgreSQL ou MySQL quando muitos clientes escrevem ao mesmo tempo.
+
+Este programa só executa SQLite, então aqui não há exercício."""
+"grant-revoke.title" = "GRANT e REVOKE: permissões"
+"grant-revoke.theory" = """
+Os bancos de dados de servidor têm usuários e papéis (roles), e decidem o que cada um pode fazer. GRANT dá uma permissão e REVOKE a retira (sintaxe do PostgreSQL):
+
+  CREATE ROLE analyst LOGIN PASSWORD '...';
+  GRANT SELECT ON orders, customers TO analyst;     -- somente leitura
+  GRANT INSERT, UPDATE ON orders TO app_backend;
+  REVOKE UPDATE ON orders FROM app_backend;
+
+Siga o princípio do menor privilégio: cada programa e pessoa recebe só o que precisa. O app web não deveria conectar como dono do banco, uma ferramenta de relatórios deveria apenas ler e ninguém precisa de DROP no trabalho diário. Os roles permitem dar permissões uma vez a um grupo (GRANT analyst TO ana). O MySQL tem as mesmas instruções GRANT/REVOKE com seus próprios detalhes.
+
+O SQLite não tem usuários nem GRANT: quem consegue abrir o arquivo pode fazer tudo. A proteção vem do sistema operacional (permissões de arquivo) e da sua aplicação. Por isso este sandbox restringe os arquivos que podem ser alcançados."""
+"isolation.title" = "Níveis de isolamento e concorrência"
+"isolation.theory" = """
+Quando muitas transações rodam ao mesmo tempo, o isolamento decide o que uma pode ver das outras. O padrão define níveis conforme as anomalias que permitem:
+
+  Leitura suja               ler dados que outra transação ainda não confirmou
+  Leitura não repetível      ler a mesma linha duas vezes e obter valores diferentes
+  Fantasma                   executar a mesma consulta duas vezes e obter linhas diferentes
+
+  READ UNCOMMITTED   permite as três
+  READ COMMITTED     sem leituras sujas (padrão no PostgreSQL)
+  REPEATABLE READ    sem leituras sujas nem não repetíveis (padrão no MySQL InnoDB)
+  SERIALIZABLE       como se as transações rodassem uma depois da outra
+
+Mais isolamento é mais seguro, mas pode fazer as transações esperarem (bloqueios) ou falharem e precisarem de nova tentativa. Duas transações que esperam uma pela outra causam um deadlock, e o banco aborta uma delas.
+
+O SQLite é mais simples: as transações são SERIALIZABLE, há um único escritor por vez e os leitores podem trabalhar durante uma escrita se você ativar PRAGMA journal_mode = WAL. Um segundo escritor recebe SQLITE_BUSY após um tempo de espera (PRAGMA busy_timeout). Mantenha curtas as transações de escrita em todos os motores."""
+"sql-injection.title" = "Injeção de SQL e consultas parametrizadas"
+"sql-injection.theory" = """
+A injeção de SQL acontece quando um programa monta uma consulta colando texto do usuário nela:
+
+  query = "SELECT * FROM users WHERE name = '" + name + "'"
+
+Se name for   x' OR '1'='1   o SQL final é   SELECT * FROM users WHERE name = 'x' OR '1'='1'   e devolve todos os usuários. Com   x'; DROP TABLE users; --   o atacante executa o que quiser. Continua sendo uma das vulnerabilidades mais comuns e custosas.
+
+A solução é uma consulta parametrizada (preparada): o texto SQL e os valores viajam separados, então um valor nunca pode virar código.
+
+  SELECT * FROM users WHERE name = ?          -- SQLite, MySQL
+  SELECT * FROM users WHERE name = $1         -- PostgreSQL
+  cursor.execute("SELECT * FROM users WHERE name = ?", (name,))
+
+Regras: nunca concatene nem formate entrada do usuário dentro de SQL (isso inclui f-strings e templates de texto); use os marcadores do seu driver ou ORM; um marcador não pode substituir o nome de uma tabela ou coluna, então valide-os contra uma lista fixa; conecte com um usuário de privilégios mínimos; e valide a entrada nas bordas. Este programa se protege com o mesmo espírito: os arquivos e as extensões são restringidos pelo motor, não pela confiança no que você digita."""

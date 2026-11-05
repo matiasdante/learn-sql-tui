@@ -1,0 +1,159 @@
+"select.title" = "SELECT: leer filas"
+"select.theory" = """
+Una tabla es una grilla de filas y columnas. SELECT lee de ella sin cambiar nada:
+
+  SELECT name, city FROM customers;
+  SELECT * FROM products;        -- * significa todas las columnas
+
+La base de práctica es una tienda online chica: customers, products, orders y order_items. Escribí .tables para listar las tablas y .schema customers para ver cómo está armada una.
+
+Las sentencias terminan con ; y pueden ocupar varias líneas. Apretá F1 para una pista y F5 cuando creas que terminaste."""
+"select-1.prompt" = "Mostrá el nombre y la ciudad de cada cliente."
+"select-1.hint1" = "Nombrá las dos columnas después de SELECT, separadas por coma."
+"select-1.hint2" = "SELECT name, city FROM customers;"
+"select-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"select-2.prompt" = "Mostrá todas las columnas de la tabla products."
+"select-2.hint1" = "Hay un atajo para \"todas las columnas\"."
+"select-2.hint2" = "SELECT * FROM products;"
+"select-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"expressions.title" = "Expresiones y alias"
+"expressions.theory" = """
+Un SELECT puede calcular valores, no solo copiar columnas. AS le pone un nombre (alias) al resultado:
+
+  SELECT name, price * stock AS stock_value FROM products;
+
+El texto se une con ||:
+
+  SELECT name || ' (' || country || ')' AS label FROM customers;
+
+El texto va entre comillas simples. Las comillas dobles son para nombres de columnas y tablas."""
+"expr-1.prompt" = "Mostrá el nombre de cada producto y su valor en stock (precio por stock) en una columna llamada stock_value."
+"expr-1.hint1" = "Multiplicá las dos columnas y nombrá el resultado con AS."
+"expr-1.hint2" = "SELECT name, price * stock AS stock_value FROM products;"
+"expr-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"expr-2.prompt" = "Mostrá cada cliente en una sola columna de texto llamada label, con el formato Ada Lovelace (UK): el nombre, un espacio y el país entre paréntesis."
+"expr-2.hint1" = "Uní los pedazos con ||, incluyendo los literales ' (' y ')'."
+"expr-2.hint2" = "SELECT name || ' (' || country || ')' AS label FROM customers;"
+"expr-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"where.title" = "WHERE: filtrar filas"
+"where.theory" = """
+WHERE se queda solo con las filas que cumplen una condición:
+
+  SELECT name, price FROM products WHERE price > 100;
+
+Comparaciones: =  <>  <  <=  >  >=  (la igualdad es un solo =). Combiná condiciones con AND, OR y NOT:
+
+  SELECT name FROM customers WHERE country = 'UK' AND city <> 'London';
+
+AND se evalúa antes que OR; usá paréntesis ante la duda."""
+"where-1.prompt" = "Mostrá el nombre y el precio de los productos que cuestan más de 100."
+"where-1.hint1" = "Filtrá con WHERE sobre la columna price."
+"where-1.hint2" = "SELECT name, price FROM products WHERE price > 100;"
+"where-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"where-2.prompt" = "Mostrá el nombre de los clientes de USA cuya ciudad no es Boston."
+"where-2.hint1" = "Dos condiciones unidas por AND; una usa <>."
+"where-2.hint2" = "SELECT name FROM customers WHERE country = 'USA' AND city <> 'Boston';"
+"where-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"order-limit.title" = "ORDER BY, LIMIT y OFFSET"
+"order-limit.theory" = """
+Sin ORDER BY la base puede devolver las filas en cualquier orden. Pedí uno:
+
+  SELECT name, price FROM products ORDER BY price DESC;     -- el más caro primero
+  SELECT name FROM customers ORDER BY country, name;        -- por país y luego por nombre
+
+LIMIT se queda con las primeras filas y OFFSET se salta algunas, que es como funcionan las páginas:
+
+  SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 3;   -- la segunda página de 3
+
+ASC (el valor por defecto) ordena hacia arriba y DESC hacia abajo."""
+"orderlimit-1.prompt" = "Mostrá el nombre y el precio de los 3 productos más caros, el más caro primero."
+"orderlimit-1.hint1" = "Ordená por precio de mayor a menor y quedate con 3 filas."
+"orderlimit-1.hint2" = "SELECT name, price FROM products ORDER BY price DESC LIMIT 3;"
+"orderlimit-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas en el orden pedido. Revisá el ORDER BY."
+"orderlimit-2.prompt" = "Ordená los clientes por nombre, salteá los 2 primeros y mostrá los nombres de los 3 siguientes."
+"orderlimit-2.hint1" = "LIMIT toma 3 filas; OFFSET se salta 2."
+"orderlimit-2.hint2" = "SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 2;"
+"orderlimit-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas en el orden pedido. Revisá el ORDER BY."
+"distinct.title" = "DISTINCT: quitar duplicados"
+"distinct.theory" = """
+Cuando varias filas comparten un valor, un SELECT común lo repite. DISTINCT deja cada resultado distinto una sola vez:
+
+  SELECT category FROM products;            -- una fila por producto
+  SELECT DISTINCT category FROM products;   -- una fila por categoría
+
+DISTINCT se aplica a la fila entera: SELECT DISTINCT country, city deja cada par distinto."""
+"distinct-1.prompt" = "Mostrá cada país que tiene clientes, una sola vez."
+"distinct-1.hint1" = "Agregá una palabra clave justo después de SELECT."
+"distinct-1.hint2" = "SELECT DISTINCT country FROM customers;"
+"distinct-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"null.title" = "NULL: la ausencia de un valor"
+"null.theory" = """
+NULL significa "desconocido" o "sin valor". No es cero ni un texto vacío. Cualquier comparación con NULL da NULL (no verdadero), así que esto no encuentra nada:
+
+  SELECT name FROM customers WHERE email = NULL;      -- siempre vacío
+
+Usá IS NULL e IS NOT NULL:
+
+  SELECT name FROM customers WHERE email IS NULL;
+  SELECT name FROM customers WHERE email IS NOT NULL;"""
+"null-1.prompt" = "Mostrá el nombre de los clientes que no tienen email."
+"null-1.hint1" = "= NULL nunca coincide. Hay un operador especial."
+"null-1.hint2" = "SELECT name FROM customers WHERE email IS NULL;"
+"null-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"null-2.prompt" = "Mostrá el nombre y el email de los clientes que sí tienen email."
+"null-2.hint1" = "Usá IS NOT NULL."
+"null-2.hint2" = "SELECT name, email FROM customers WHERE email IS NOT NULL;"
+"null-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"like.title" = "LIKE: buscar patrones de texto"
+"like.theory" = """
+LIKE compara texto con un patrón. % coincide con cualquier cantidad de caracteres (incluso ninguno) y _ con exactamente uno:
+
+  SELECT name FROM customers WHERE name LIKE 'M%';       -- empieza con M
+  SELECT name FROM products  WHERE name LIKE '%top';     -- termina en top
+  SELECT name FROM products  WHERE name LIKE '_en%';     -- segunda letra e, tercera n
+
+En SQLite, LIKE no distingue mayúsculas de minúsculas en las letras inglesas comunes."""
+"like-1.prompt" = "Mostrá el nombre de los clientes cuyo nombre empieza con M."
+"like-1.hint1" = "El patrón es la letra seguida de %."
+"like-1.hint2" = "SELECT name FROM customers WHERE name LIKE 'M%';"
+"like-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"like-2.prompt" = "Mostrá el nombre de los productos que contienen las letras \"on\" en cualquier parte."
+"like-2.hint1" = "Poné % a los dos lados de las letras."
+"like-2.hint2" = "SELECT name FROM products WHERE name LIKE '%on%';"
+"like-2.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"in-between.title" = "IN y BETWEEN"
+"in-between.theory" = """
+IN reemplaza una cadena de OR:
+
+  SELECT name FROM products WHERE category IN ('furniture', 'stationery');
+
+BETWEEN comprueba un rango, con los dos extremos incluidos:
+
+  SELECT id FROM orders WHERE ordered_at BETWEEN '2024-01-01' AND '2024-01-31';
+
+Las fechas se guardan como texto con la forma AAAA-MM-DD, así que compararlas como texto las ordena bien."""
+"in-1.prompt" = "Mostrá el nombre y la categoría de los productos de las categorías furniture o accessories."
+"in-1.hint1" = "Poné las dos categorías dentro de IN (...)."
+"in-1.hint2" = "SELECT name, category FROM products WHERE category IN ('furniture', 'accessories');"
+"in-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"between-1.prompt" = "Mostrá el id y ordered_at de los pedidos hechos del 2024-02-01 al 2024-03-01, ambos días incluidos."
+"between-1.hint1" = "BETWEEN ya incluye ambos extremos."
+"between-1.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at BETWEEN '2024-02-01' AND '2024-03-01';"
+"between-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."
+"case.title" = "CASE: condiciones dentro de una consulta"
+"case.theory" = """
+CASE es el if/else de SQL. El primer WHEN verdadero decide el valor:
+
+  SELECT name,
+         CASE
+           WHEN price >= 500 THEN 'expensive'
+           WHEN price >= 50  THEN 'medium'
+           ELSE 'cheap'
+         END AS tier
+  FROM products;
+
+Sin ELSE, una fila que no cumple ningún WHEN recibe NULL."""
+"case-1.prompt" = "Mostrá el nombre de cada producto y una columna llamada level: 'out' si el stock es 0, 'low' si es menor a 20 y 'ok' en los demás casos."
+"case-1.hint1" = "Probá primero el caso más específico: stock = 0."
+"case-1.hint2" = "SELECT name, CASE WHEN stock = 0 THEN 'out' WHEN stock < 20 THEN 'low' ELSE 'ok' END AS level FROM products;"
+"case-1.check1.fail" = "Tu última consulta no devuelve las filas pedidas (o todavía no ejecutaste ninguna). Corregila y ejecutala de nuevo."

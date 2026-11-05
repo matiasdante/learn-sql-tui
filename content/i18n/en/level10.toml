@@ -1,0 +1,79 @@
+"attach.title" = "ATTACH: using several database files"
+"attach.theory" = """
+A SQLite database is one file. ATTACH opens another file under a name, and then you can query both in the same statement:
+
+  ATTACH DATABASE 'archive.db' AS archive;
+  CREATE TABLE archive.old_orders AS SELECT * FROM orders WHERE status = 'shipped';
+  SELECT count(*) FROM archive.old_orders;
+  DETACH archive;
+
+Tables of the main database can be used without a prefix (main.orders); the attached ones need theirs (archive.old_orders). If the file does not exist it is created. PRAGMA database_list shows what is attached.
+
+In this sandbox, ATTACH only works with files inside the practice folder: nothing outside it can be opened or created."""
+"attach-1.prompt" = "Attach a new file archive.db with the name archive and copy the shipped orders into a new table archive.shipped_orders (CREATE TABLE ... AS SELECT)."
+"attach-1.hint1" = "ATTACH DATABASE 'archive.db' AS archive; and then CREATE TABLE archive.shipped_orders AS SELECT ..."
+"attach-1.hint2" = "ATTACH DATABASE 'archive.db' AS archive;\nCREATE TABLE archive.shipped_orders AS SELECT * FROM orders WHERE status = 'shipped';"
+"attach-1.check1.fail" = "The database must be attached with the name archive."
+"attach-1.check2.fail" = "archive.shipped_orders must contain the 6 shipped orders."
+"attach-1.check3.fail" = "The file archive.db was not created."
+"vacuum.title" = "VACUUM and backups"
+"vacuum.theory" = """
+When you DELETE rows, the file does not shrink: the freed space is reused later. VACUUM rebuilds the whole file without that free space:
+
+  VACUUM;
+
+It needs no open transaction and temporary room for a copy of the database. A related form writes the compacted result to a new file and leaves the original untouched, which makes a convenient backup of a live database:
+
+  VACUUM INTO 'backup.db';
+
+Other tools: PRAGMA page_count and PRAGMA freelist_count show how many pages the file has and how many are free."""
+"vacuum-1.prompt" = "Make a compacted backup copy of the database in the file backup.db."
+"vacuum-1.hint1" = "VACUUM INTO 'backup.db';"
+"vacuum-1.hint2" = "VACUUM INTO 'backup.db';"
+"vacuum-1.check1.fail" = "The file backup.db does not exist yet."
+"vacuum-1.check2.fail" = "Use VACUUM INTO as asked."
+"integrity.title" = "integrity_check and quick_check"
+"integrity.theory" = """
+Disks fail and files get truncated. PRAGMA integrity_check reads the whole database and verifies that its structure is sound:
+
+  PRAGMA integrity_check;        -- one row with ok, or a list of problems
+  PRAGMA quick_check;            -- faster, skips some checks
+  PRAGMA foreign_key_check;      -- logical problems: orphan rows
+
+Run integrity_check after a crash, before and after a restore, or from a scheduled job. If it reports problems, restore your last good backup: repairing by hand is rarely worth it."""
+"integrity-1.prompt" = "Check that the database is healthy with PRAGMA integrity_check. The answer must be ok."
+"integrity-1.hint1" = "PRAGMA integrity_check;"
+"integrity-1.hint2" = "PRAGMA integrity_check;"
+"integrity-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"import-csv.title" = "Importing CSV files"
+"import-csv.theory" = """
+CSV is the universal exchange format. The .import command loads a file into a table:
+
+  .import people.csv people              creates the table people if it does not exist,
+                                         taking the column names from the first row
+  .import --skip 1 temps.csv temps       the table exists already: skip the header row
+
+Tables created by .import have only TEXT columns. For real types, create the table first with the right column types and use --skip 1: SQLite then converts '3.5' into a REAL because of the column's affinity. To see a file's rows you can create it with the edit command (edit people.csv) and read it back with .read or .import."""
+"import-1.prompt" = "The file people.csv (name,age,city) is in the practice folder. Import it into a new table called people, letting .import create the table from the header row."
+"import-1.hint1" = ".import people.csv people"
+"import-1.hint2" = ".import people.csv people"
+"import-1.check1.fail" = "The table people does not exist yet."
+"import-1.check2.fail" = "people should contain the 3 people of the file (not the header)."
+"import-1.check3.fail" = "The columns must be name, age and city."
+"import-2.prompt" = "The table temperatures (day TEXT, celsius REAL) exists and the file temps.csv has a header row. Import its data rows without the header."
+"import-2.hint1" = ".import --skip 1 temps.csv temperatures"
+"import-2.hint2" = ".import --skip 1 temps.csv temperatures"
+"import-2.check1.fail" = "temperatures should have exactly the 3 data rows (no header row)."
+"import-2.check2.fail" = "The values should be stored as REAL numbers."
+"user-version.title" = "user_version and migrations"
+"user-version.theory" = """
+Applications evolve their tables over time. SQLite leaves a free integer in the file header for you to track the schema version:
+
+  PRAGMA user_version;          -- 0 for a new database
+  PRAGMA user_version = 3;
+
+A typical migration routine at startup: read user_version; if it is 1, run the script that goes to 2 and set user_version = 2; and so on until it reaches the latest. Do each step inside a transaction so a failure leaves the database in a known version. Other useful header values: PRAGMA application_id, PRAGMA journal_mode (WAL allows readers during a write) and PRAGMA page_size."""
+"userversion-1.prompt" = "Mark this database as schema version 3 using PRAGMA user_version."
+"userversion-1.hint1" = "PRAGMA user_version = 3;"
+"userversion-1.hint2" = "PRAGMA user_version = 3;"
+"userversion-1.check1.fail" = "user_version is not 3 yet."

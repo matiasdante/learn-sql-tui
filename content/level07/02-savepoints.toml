@@ -1,0 +1,17 @@
+id = "savepoints"
+level = 7
+order = 2
+
+[[exercise]]
+id = "savepoint-1"
+hints = 2
+solution = ["BEGIN;\nINSERT INTO log VALUES ('first');\nSAVEPOINT sp1;\nINSERT INTO log VALUES ('second');\nROLLBACK TO sp1;\nCOMMIT;"]
+setup = [
+  { do = "sql", script = "CREATE TABLE log (msg TEXT);" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT msg FROM log", rows = [["first"]] },
+  { type = "autocommit" },
+  { type = "ran", any = ["SAVEPOINT"] },
+  { type = "ran", any = ["ROLLBACK TO"] },
+]

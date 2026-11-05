@@ -1,0 +1,159 @@
+"select.title" = "SELECT：读取行"
+"select.theory" = """
+表是由行和列组成的网格。SELECT 读取数据，不会改变任何内容：
+
+  SELECT name, city FROM customers;
+  SELECT * FROM products;        -- * 表示所有列
+
+练习数据库是一个小型网店：customers、products、orders 和 order_items。输入 .tables 列出所有表，输入 .schema customers 查看一张表的结构。
+
+语句以 ; 结尾，可以写成多行。按 F1 获取提示，觉得完成后按 F5 检查。"""
+"select-1.prompt" = "显示每位客户的姓名和城市。"
+"select-1.hint1" = "在 SELECT 后写出两个列名，用逗号分隔。"
+"select-1.hint2" = "SELECT name, city FROM customers;"
+"select-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"select-2.prompt" = "显示 products 表的所有列。"
+"select-2.hint1" = "有一个表示“所有列”的简写。"
+"select-2.hint2" = "SELECT * FROM products;"
+"select-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"expressions.title" = "表达式与别名"
+"expressions.theory" = """
+SELECT 不只是复制列，还可以计算值。AS 给结果起一个名字（别名）：
+
+  SELECT name, price * stock AS stock_value FROM products;
+
+文本用 || 连接：
+
+  SELECT name || ' (' || country || ')' AS label FROM customers;
+
+文本放在单引号里。双引号用于列名和表名。"""
+"expr-1.prompt" = "显示每个商品的名称及其库存价值（price 乘以 stock），列名为 stock_value。"
+"expr-1.hint1" = "把两列相乘，并用 AS 给结果命名。"
+"expr-1.hint2" = "SELECT name, price * stock AS stock_value FROM products;"
+"expr-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"expr-2.prompt" = "把每位客户显示为一个名为 label 的文本列，格式如 Ada Lovelace (UK)：姓名、一个空格，再加括号中的国家。"
+"expr-2.hint1" = "用 || 连接各部分，包括字面量 ' (' 和 ')'。"
+"expr-2.hint2" = "SELECT name || ' (' || country || ')' AS label FROM customers;"
+"expr-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"where.title" = "WHERE：筛选行"
+"where.theory" = """
+WHERE 只保留满足条件的行：
+
+  SELECT name, price FROM products WHERE price > 100;
+
+比较运算符：=  <>  <  <=  >  >=（相等只用一个 =）。用 AND、OR 和 NOT 组合条件：
+
+  SELECT name FROM customers WHERE country = 'UK' AND city <> 'London';
+
+AND 先于 OR 计算；拿不准时请加括号。"""
+"where-1.prompt" = "显示价格超过 100 的商品的名称和价格。"
+"where-1.hint1" = "用 WHERE 对 price 列做筛选。"
+"where-1.hint2" = "SELECT name, price FROM products WHERE price > 100;"
+"where-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"where-2.prompt" = "显示来自 USA 且城市不是 Boston 的客户姓名。"
+"where-2.hint1" = "两个条件用 AND 连接，其中一个使用 <>。"
+"where-2.hint2" = "SELECT name FROM customers WHERE country = 'USA' AND city <> 'Boston';"
+"where-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"order-limit.title" = "ORDER BY、LIMIT 和 OFFSET"
+"order-limit.theory" = """
+没有 ORDER BY 时，数据库可能以任意顺序返回行。请明确指定顺序：
+
+  SELECT name, price FROM products ORDER BY price DESC;     -- 价格最高的在前
+  SELECT name FROM customers ORDER BY country, name;        -- 先按国家，再按姓名
+
+LIMIT 只保留前几行，OFFSET 跳过若干行，分页就是这样实现的：
+
+  SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 3;   -- 每页 3 行的第二页
+
+ASC（默认）升序，DESC 降序。"""
+"orderlimit-1.prompt" = "显示价格最高的 3 个商品的名称和价格，最贵的排在最前。"
+"orderlimit-1.hint1" = "按价格从高到低排序，只保留 3 行。"
+"orderlimit-1.hint2" = "SELECT name, price FROM products ORDER BY price DESC LIMIT 3;"
+"orderlimit-1.check1.fail" = "你最近一次查询返回的行或顺序与要求不符。请检查 ORDER BY。"
+"orderlimit-2.prompt" = "把客户按姓名排序，跳过前 2 个，显示接下来 3 个的姓名。"
+"orderlimit-2.hint1" = "LIMIT 取 3 行；OFFSET 跳过 2 行。"
+"orderlimit-2.hint2" = "SELECT name FROM customers ORDER BY name LIMIT 3 OFFSET 2;"
+"orderlimit-2.check1.fail" = "你最近一次查询返回的行或顺序与要求不符。请检查 ORDER BY。"
+"distinct.title" = "DISTINCT：去除重复"
+"distinct.theory" = """
+当多行有相同的值时，普通 SELECT 会重复显示。DISTINCT 让每个不同的结果只出现一次：
+
+  SELECT category FROM products;            -- 每个商品一行
+  SELECT DISTINCT category FROM products;   -- 每个类别一行
+
+DISTINCT 作用于整行：SELECT DISTINCT country, city 会保留每一对不同的组合。"""
+"distinct-1.prompt" = "显示有客户的每个国家，每个国家只出现一次。"
+"distinct-1.hint1" = "在 SELECT 后面紧接着加一个关键字。"
+"distinct-1.hint2" = "SELECT DISTINCT country FROM customers;"
+"distinct-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"null.title" = "NULL：值的缺失"
+"null.theory" = """
+NULL 表示“未知”或“没有值”，它不是 0，也不是空字符串。任何与 NULL 的比较结果都是 NULL（不是真），所以下面这条查不到任何行：
+
+  SELECT name FROM customers WHERE email = NULL;      -- 永远为空
+
+请使用 IS NULL 和 IS NOT NULL：
+
+  SELECT name FROM customers WHERE email IS NULL;
+  SELECT name FROM customers WHERE email IS NOT NULL;"""
+"null-1.prompt" = "显示没有 email 的客户姓名。"
+"null-1.hint1" = "= NULL 永远匹配不到。有专门的运算符。"
+"null-1.hint2" = "SELECT name FROM customers WHERE email IS NULL;"
+"null-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"null-2.prompt" = "显示有 email 的客户的姓名和 email。"
+"null-2.hint1" = "使用 IS NOT NULL。"
+"null-2.hint2" = "SELECT name, email FROM customers WHERE email IS NOT NULL;"
+"null-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"like.title" = "LIKE：按模式搜索文本"
+"like.theory" = """
+LIKE 用模式比较文本。% 匹配任意长度的字符（可以为空），_ 恰好匹配一个字符：
+
+  SELECT name FROM customers WHERE name LIKE 'M%';       -- 以 M 开头
+  SELECT name FROM products  WHERE name LIKE '%top';     -- 以 top 结尾
+  SELECT name FROM products  WHERE name LIKE '_en%';     -- 第二个字母 e，第三个 n
+
+在 SQLite 中，LIKE 对普通英文字母不区分大小写。"""
+"like-1.prompt" = "显示姓名以 M 开头的客户姓名。"
+"like-1.hint1" = "模式是这个字母后面跟 %。"
+"like-1.hint2" = "SELECT name FROM customers WHERE name LIKE 'M%';"
+"like-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"like-2.prompt" = "显示名称中任意位置包含 \"on\" 的商品名称。"
+"like-2.hint1" = "在这两个字母的两侧都加上 %。"
+"like-2.hint2" = "SELECT name FROM products WHERE name LIKE '%on%';"
+"like-2.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"in-between.title" = "IN 和 BETWEEN"
+"in-between.theory" = """
+IN 可以代替一串 OR：
+
+  SELECT name FROM products WHERE category IN ('furniture', 'stationery');
+
+BETWEEN 检查一个范围，两端都包含在内：
+
+  SELECT id FROM orders WHERE ordered_at BETWEEN '2024-01-01' AND '2024-01-31';
+
+日期以 YYYY-MM-DD 格式的文本保存，所以按文本比较就能正确排序。"""
+"in-1.prompt" = "显示类别为 furniture 或 accessories 的商品的名称和类别。"
+"in-1.hint1" = "把两个类别放进 IN (...) 里。"
+"in-1.hint2" = "SELECT name, category FROM products WHERE category IN ('furniture', 'accessories');"
+"in-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"between-1.prompt" = "显示下单日期从 2024-02-01 到 2024-03-01（含两端）的订单的 id 和 ordered_at。"
+"between-1.hint1" = "BETWEEN 已经包含两个端点。"
+"between-1.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at BETWEEN '2024-02-01' AND '2024-03-01';"
+"between-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"
+"case.title" = "CASE：查询中的条件"
+"case.theory" = """
+CASE 就是 SQL 里的 if/else。第一个为真的 WHEN 决定结果：
+
+  SELECT name,
+         CASE
+           WHEN price >= 500 THEN 'expensive'
+           WHEN price >= 50  THEN 'medium'
+           ELSE 'cheap'
+         END AS tier
+  FROM products;
+
+没有 ELSE 时，不满足任何 WHEN 的行得到 NULL。"""
+"case-1.prompt" = "显示每个商品的名称和一个名为 level 的列：库存为 0 时为 'out'，小于 20 时为 'low'，其余为 'ok'。"
+"case-1.hint1" = "先判断最具体的情况：stock = 0。"
+"case-1.hint2" = "SELECT name, CASE WHEN stock = 0 THEN 'out' WHEN stock < 20 THEN 'low' ELSE 'ok' END AS level FROM products;"
+"case-1.check1.fail" = "你最近一次查询返回的行与要求不符（或者还没有执行查询）。请修改后重新执行。"

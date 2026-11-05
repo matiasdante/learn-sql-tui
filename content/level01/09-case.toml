@@ -1,0 +1,14 @@
+id = "case"
+level = 1
+order = 9
+
+[[exercise]]
+id = "case-1"
+hints = 2
+solution = ["SELECT name, CASE WHEN stock = 0 THEN 'out' WHEN stock < 20 THEN 'low' ELSE 'ok' END AS level FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, CASE WHEN stock = 0 THEN 'out' WHEN stock < 20 THEN 'low' ELSE 'ok' END AS level FROM products" },
+]

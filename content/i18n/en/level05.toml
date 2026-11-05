@@ -1,0 +1,82 @@
+"insert.title" = "INSERT: adding rows"
+"insert.theory" = """
+INSERT adds rows. Name the columns, then give the values in the same order:
+
+  INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);
+
+Columns you leave out get their DEFAULT (or NULL, or the next number for an INTEGER PRIMARY KEY). Several rows at once:
+
+  INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');
+
+You can also insert the result of a query: INSERT INTO archive SELECT * FROM tasks WHERE done = 1;
+
+This level changes data: when your answer is wrong, F5 puts the tasks table back as it was."""
+"insert-1.prompt" = "Add the task 'Read a book' with priority 2 to the tasks table."
+"insert-1.hint1" = "INSERT INTO tasks (title, priority) VALUES (...)."
+"insert-1.hint2" = "INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);"
+"insert-1.check1.fail" = "There is no task 'Read a book' with priority 2 (and done = 0) yet."
+"insert-1.check2.fail" = "The table should have exactly one new row."
+"insert-2.prompt" = "Add two tasks with a single INSERT: 'Water plants' and 'Clean desk'. Let the other columns take their defaults."
+"insert-2.hint1" = "List both rows after VALUES, separated by a comma, and only fill the title column."
+"insert-2.hint2" = "INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');"
+"insert-2.check1.fail" = "The two new tasks are missing, or they do not have the default done = 0 and priority = 3."
+"insert-2.check2.fail" = "The table should have exactly two new rows."
+"update.title" = "UPDATE: changing rows"
+"update.theory" = """
+UPDATE changes columns of the rows that match WHERE:
+
+  UPDATE tasks SET done = 1 WHERE title = 'Pay rent';
+  UPDATE tasks SET priority = priority + 1, done = 0 WHERE id = 3;
+
+Careful: without WHERE, UPDATE changes every row of the table. Before an important UPDATE, run the same WHERE in a SELECT to see which rows it would touch."""
+"update-1.prompt" = "Mark the task 'Pay rent' as done (done = 1) without touching any other task."
+"update-1.hint1" = "UPDATE tasks SET done = 1 WHERE ..."
+"update-1.hint2" = "UPDATE tasks SET done = 1 WHERE title = 'Pay rent';"
+"update-1.check1.fail" = "'Pay rent' is not marked as done yet."
+"update-1.check2.fail" = "Exactly three tasks should be done now: the two that were done and Pay rent."
+"update-2.prompt" = "Set the priority to 1 for every task that is not done yet. Do not change the tasks that are done."
+"update-2.hint1" = "The WHERE decides which rows change: done = 0."
+"update-2.hint2" = "UPDATE tasks SET priority = 1 WHERE done = 0;"
+"update-2.check1.fail" = "All the tasks that are not done must have priority 1."
+"update-2.check2.fail" = "The tasks that were already done must keep their priority."
+"delete.title" = "DELETE: removing rows"
+"delete.theory" = """
+DELETE removes the rows that match WHERE:
+
+  DELETE FROM tasks WHERE done = 1;
+
+Same warning as UPDATE: DELETE FROM tasks; with no WHERE empties the table. The table itself stays; DROP TABLE removes the table (level 6).
+
+There is no undo button. In level 7 you will learn transactions, which let you try a DELETE and ROLLBACK if it was a mistake."""
+"delete-1.prompt" = "Delete the tasks that are already done. The pending ones must stay."
+"delete-1.hint1" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.hint2" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.check1.fail" = "There are still tasks with done = 1."
+"delete-1.check2.fail" = "The three pending tasks must remain in the table."
+"upsert.title" = "UPSERT: insert or update"
+"upsert.theory" = """
+What if the row may or may not exist? ON CONFLICT turns an INSERT that would fail (duplicate key) into an update:
+
+  INSERT INTO counters (name, value) VALUES ('visits', 1)
+  ON CONFLICT (name) DO UPDATE SET value = value + 1;
+
+If 'visits' does not exist it is inserted with 1; if it exists, its value grows by 1. Inside DO UPDATE, excluded.value is the value you tried to insert. Use DO NOTHING to simply skip duplicates. The conflict target (name) must be a PRIMARY KEY or UNIQUE column."""
+"upsert-1.prompt" = "Register one more visit in the counters table: insert ('visits', 1) and, because 'visits' already exists, add 1 to its value using ON CONFLICT. It must end up as 11."
+"upsert-1.hint1" = "INSERT ... ON CONFLICT (name) DO UPDATE SET value = value + 1."
+"upsert-1.hint2" = "INSERT INTO counters (name, value) VALUES ('visits', 1) ON CONFLICT (name) DO UPDATE SET value = value + 1;"
+"upsert-1.check1.fail" = "The counter 'visits' should be 11."
+"upsert-1.check2.fail" = "Use INSERT ... ON CONFLICT as asked."
+"returning.title" = "RETURNING: get the changed rows back"
+"returning.theory" = """
+INSERT, UPDATE and DELETE can hand back the rows they touched with RETURNING, so you do not need a second query:
+
+  INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;
+  UPDATE tasks SET done = 1 WHERE priority = 1 RETURNING id, title;
+  DELETE FROM tasks WHERE done = 1 RETURNING title;
+
+It is the clean way to learn the id that the database generated for a new row. The result shows up as a table, like a SELECT."""
+"returning-1.prompt" = "Add the task 'Plan trip' and make the same statement return the id that the database generated for it."
+"returning-1.hint1" = "Add RETURNING id at the end of the INSERT."
+"returning-1.hint2" = "INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;"
+"returning-1.check1.fail" = "The task 'Plan trip' is not in the table yet."
+"returning-1.check2.fail" = "Use RETURNING in the INSERT as asked."

@@ -1,0 +1,59 @@
+"dialects.title" = "PostgreSQL, MySQL and other dialects"
+"dialects.theory" = """
+Everything you practiced works in SQLite. The core of SQL (SELECT, JOIN, GROUP BY, subqueries, CTEs, window functions) is shared by PostgreSQL, MySQL/MariaDB, SQL Server and Oracle, but each one has its own dialect. The differences you will meet first:
+
+  Auto-numbered key   SQLite INTEGER PRIMARY KEY · PostgreSQL GENERATED ... AS IDENTITY (or SERIAL) · MySQL AUTO_INCREMENT
+  Limiting rows       LIMIT 10 (SQLite, PostgreSQL, MySQL) · TOP 10 (SQL Server) · FETCH FIRST 10 ROWS ONLY (standard, Oracle)
+  Joining text        'a' || 'b' (SQLite, PostgreSQL) · CONCAT('a', 'b') (MySQL, SQL Server)
+  Quoting names       "name" (standard, SQLite, PostgreSQL) · `name` (MySQL) · [name] (SQL Server)
+  Upsert              ON CONFLICT DO UPDATE (SQLite, PostgreSQL) · ON DUPLICATE KEY UPDATE (MySQL)
+  Types               PostgreSQL and MySQL enforce column types (BOOLEAN, DATE, TIMESTAMP, JSONB, UUID...); SQLite does not unless the table is STRICT
+  Dates               strftime(...) in SQLite · to_char(...), date_trunc(...) in PostgreSQL · DATE_FORMAT(...) in MySQL
+  Case-insensitive    ILIKE in PostgreSQL · LIKE depends on the collation in MySQL
+
+Also, PostgreSQL and MySQL are servers: programs connect over the network with a user and a password, many at the same time. SQLite is a library that reads a file. Pick the engine for the job: SQLite for local apps, tests and small sites; PostgreSQL or MySQL when many clients write at once.
+
+This program only runs SQLite, so there is no exercise here."""
+"grant-revoke.title" = "GRANT and REVOKE: permissions"
+"grant-revoke.theory" = """
+Server databases have users and roles, and decide what each one may do. GRANT gives a permission and REVOKE takes it back (PostgreSQL syntax):
+
+  CREATE ROLE analyst LOGIN PASSWORD '...';
+  GRANT SELECT ON orders, customers TO analyst;     -- read only
+  GRANT INSERT, UPDATE ON orders TO app_backend;
+  REVOKE UPDATE ON orders FROM app_backend;
+
+Follow the principle of least privilege: every program and person gets only what it needs. The web app should not connect as the owner of the database, a reporting tool should only read, and nobody needs DROP in daily work. Roles let you grant once to a group (GRANT analyst TO ana). MySQL has the same GRANT/REVOKE statements with its own details.
+
+SQLite has no users and no GRANT: whoever can open the file can do everything. Protection comes from the operating system (file permissions) and from your application. That is why this sandbox restricts the files that can be reached."""
+"isolation.title" = "Isolation levels and concurrency"
+"isolation.theory" = """
+When many transactions run at once, isolation decides what one can see of the others. The standard defines levels by the anomalies they allow:
+
+  Dirty read            reading data another transaction has not committed yet
+  Non-repeatable read   reading the same row twice and getting different values
+  Phantom               running the same query twice and getting different rows
+
+  READ UNCOMMITTED   allows all three
+  READ COMMITTED     no dirty reads (default in PostgreSQL)
+  REPEATABLE READ    no dirty or non-repeatable reads (default in MySQL InnoDB)
+  SERIALIZABLE       as if transactions ran one after another
+
+Higher isolation is safer but can make transactions wait (locks) or fail and need a retry. Two transactions that wait for each other cause a deadlock, and the database aborts one of them.
+
+SQLite is simpler: transactions are SERIALIZABLE, there is a single writer at a time, and readers can work during a write if you enable PRAGMA journal_mode = WAL. A second writer receives SQLITE_BUSY after a timeout (PRAGMA busy_timeout). Keep write transactions short in every engine."""
+"sql-injection.title" = "SQL injection and parameterized queries"
+"sql-injection.theory" = """
+SQL injection happens when a program builds a query by gluing user text into it:
+
+  query = "SELECT * FROM users WHERE name = '" + name + "'"
+
+If name is   x' OR '1'='1   the final SQL is   SELECT * FROM users WHERE name = 'x' OR '1'='1'   and returns every user. With   x'; DROP TABLE users; --   the attacker runs whatever they like. It is still one of the most common and costly vulnerabilities.
+
+The fix is a parameterized (prepared) query: the SQL text and the values travel separately, so a value can never become code.
+
+  SELECT * FROM users WHERE name = ?          -- SQLite, MySQL
+  SELECT * FROM users WHERE name = $1         -- PostgreSQL
+  cursor.execute("SELECT * FROM users WHERE name = ?", (name,))
+
+Rules: never concatenate or format user input into SQL (that includes f-strings and string templates); use the placeholders of your driver or ORM; a placeholder cannot replace a table or column name, so check those against a fixed list; connect with a user that has the minimum privileges; and validate input at the edges. This program protects itself in the same spirit: files and extensions are restricted by the engine, not by trusting what you type."""

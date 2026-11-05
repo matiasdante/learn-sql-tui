@@ -1,0 +1,15 @@
+id = "generated-columns"
+level = 6
+order = 7
+
+[[exercise]]
+id = "generated-1"
+hints = 2
+solution = ["ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"]
+setup = [
+  { do = "sql", script = "CREATE TABLE items (id INTEGER PRIMARY KEY, price REAL NOT NULL, qty INTEGER NOT NULL); INSERT INTO items VALUES (1, 2.5, 4), (2, 10, 3);" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT count(*) FROM pragma_table_xinfo('items') WHERE name = 'total' AND hidden IN (2, 3)", rows = [["1"]] },
+  { type = "query_equals", sql = "SELECT total FROM items ORDER BY id", rows = [["10"], ["30"]] },
+]

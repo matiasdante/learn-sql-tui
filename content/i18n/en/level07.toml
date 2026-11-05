@@ -1,0 +1,75 @@
+"transactions.title" = "BEGIN, COMMIT and ROLLBACK"
+"transactions.theory" = """
+A transaction groups statements so that they succeed or fail together. Moving money must subtract from one account and add to the other, never only one of them:
+
+  BEGIN;
+  UPDATE accounts SET balance = balance - 30 WHERE id = 1;
+  UPDATE accounts SET balance = balance + 30 WHERE id = 2;
+  COMMIT;       -- make it permanent
+  -- or ROLLBACK;  -- throw everything away
+
+The prompt changes to sql*> while a transaction is open. Outside BEGIN, every statement is its own transaction and commits immediately. Transactions give you the ACID guarantees: all-or-nothing (Atomic), valid data (Consistent), invisible to others until committed (Isolated) and kept after a crash (Durable)."""
+"tx-1.prompt" = "Transfer 30 from Ada (account 1) to Grace (account 2) in a single transaction: BEGIN, both UPDATEs, and COMMIT."
+"tx-1.hint1" = "Do not forget the final COMMIT: the prompt must go back to sql> ."
+"tx-1.hint2" = "BEGIN;\nUPDATE accounts SET balance = balance - 30 WHERE id = 1;\nUPDATE accounts SET balance = balance + 30 WHERE id = 2;\nCOMMIT;"
+"tx-1.check1.fail" = "The balances should be 70 for Ada and 80 for Grace."
+"tx-1.check2.fail" = "The transaction is still open: finish it with COMMIT."
+"tx-1.check3.fail" = "Use BEGIN ... COMMIT as asked."
+"tx-2.prompt" = "Start a transaction, set every balance to 0, notice the mistake and undo it with ROLLBACK. The balances must stay 100 and 50."
+"tx-2.hint1" = "BEGIN; UPDATE accounts SET balance = 0; and then ROLLBACK;"
+"tx-2.hint2" = "BEGIN;\nUPDATE accounts SET balance = 0;\nROLLBACK;"
+"tx-2.check1.fail" = "The balances must be back to 100 and 50."
+"tx-2.check2.fail" = "The transaction is still open."
+"tx-2.check3.fail" = "Use ROLLBACK to undo the change."
+"savepoints.title" = "SAVEPOINT: partial rollback"
+"savepoints.theory" = """
+A savepoint is a bookmark inside a transaction. You can roll back to it without losing what came before:
+
+  BEGIN;
+  INSERT INTO log VALUES ('step 1');
+  SAVEPOINT sp1;
+  INSERT INTO log VALUES ('step 2');
+  ROLLBACK TO sp1;       -- step 2 is undone, step 1 is kept
+  COMMIT;                -- step 1 is saved
+
+RELEASE sp1 forgets the bookmark but keeps the changes. Savepoints can be nested, and a SAVEPOINT outside a transaction starts one."""
+"savepoint-1.prompt" = "Table log is empty. In one transaction insert 'first', create a savepoint, insert 'second', roll back to the savepoint and COMMIT. Only 'first' must be saved."
+"savepoint-1.hint1" = "BEGIN; INSERT ...; SAVEPOINT sp; INSERT ...; ROLLBACK TO sp; COMMIT;"
+"savepoint-1.hint2" = "BEGIN;\nINSERT INTO log VALUES ('first');\nSAVEPOINT sp1;\nINSERT INTO log VALUES ('second');\nROLLBACK TO sp1;\nCOMMIT;"
+"savepoint-1.check1.fail" = "log should contain only 'first'."
+"savepoint-1.check2.fail" = "The transaction is still open: finish it with COMMIT."
+"savepoint-1.check3.fail" = "Use a SAVEPOINT as asked."
+"savepoint-1.check4.fail" = "Use ROLLBACK TO the savepoint."
+"foreign-keys-pragma.title" = "PRAGMA foreign_keys"
+"foreign-keys-pragma.theory" = """
+A foreign key declared in CREATE TABLE does nothing until you turn enforcement on, and the setting is per connection:
+
+  PRAGMA foreign_keys;          -- 0 = off (the default in the sqlite3 shell)
+  PRAGMA foreign_keys = ON;
+
+With it OFF you can insert an order for a customer that does not exist, or delete a parent and leave orphans. With it ON, those statements fail with FOREIGN KEY constraint failed, and ON DELETE CASCADE / SET NULL start working.
+
+Real applications run PRAGMA foreign_keys = ON every time they open the database."""
+"fkpragma-1.prompt" = "Turn on foreign key enforcement for this session and then delete the author Ada. Her posts must disappear too (they use ON DELETE CASCADE)."
+"fkpragma-1.hint1" = "PRAGMA foreign_keys = ON; first, then DELETE FROM authors WHERE name = 'Ada';"
+"fkpragma-1.hint2" = "PRAGMA foreign_keys = ON;\nDELETE FROM authors WHERE name = 'Ada';"
+"fkpragma-1.check1.fail" = "Foreign keys are still off in this session."
+"fkpragma-1.check2.fail" = "Only Ada must be deleted from authors."
+"fkpragma-1.check3.fail" = "Ada's two posts must be gone, leaving only Grace's one."
+"foreign-key-check.title" = "foreign_key_check: finding orphans"
+"foreign-key-check.theory" = """
+If data was written while foreign keys were OFF, some rows may point to nothing. PRAGMA foreign_key_check lists every violation (table, rowid, parent table, which foreign key):
+
+  PRAGMA foreign_key_check;
+
+No rows means the database is consistent. After finding orphans you decide: delete them, fix their value, or insert the missing parent. A handy way to delete them:
+
+  DELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));
+
+Run it before turning on enforcement in an old database."""
+"fkcheck-1.prompt" = "The table posts has rows whose author_id points to an author that does not exist. Find them with PRAGMA foreign_key_check and delete only those orphans."
+"fkcheck-1.hint1" = "DELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"
+"fkcheck-1.hint2" = "PRAGMA foreign_key_check;\nDELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"
+"fkcheck-1.check1.fail" = "There are still orphan rows."
+"fkcheck-1.check2.fail" = "Only the orphans must be deleted: two valid posts remain."
+"fkcheck-1.check3.fail" = "Use PRAGMA foreign_key_check to find the orphans."

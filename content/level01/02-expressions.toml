@@ -1,0 +1,25 @@
+id = "expressions"
+level = 1
+order = 2
+
+[[exercise]]
+id = "expr-1"
+hints = 2
+solution = ["SELECT name, price * stock AS stock_value FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, price * stock AS stock_value FROM products" },
+]
+
+[[exercise]]
+id = "expr-2"
+hints = 2
+solution = ["SELECT name || ' (' || country || ')' AS label FROM customers;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name || ' (' || country || ')' AS label FROM customers" },
+]

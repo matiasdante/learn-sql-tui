@@ -1,0 +1,125 @@
+"text-functions.title" = "Funções de texto"
+"text-functions.theory" = """
+As funções transformam um valor dentro da consulta. As mais úteis para texto:
+
+  upper(x), lower(x)        mudam maiúsculas e minúsculas
+  length(x)                 quantidade de caracteres
+  substr(x, início, tam)    um pedaço do texto (o primeiro caractere é a posição 1)
+  replace(x, velho, novo)   substitui todas as ocorrências
+  trim(x)                   remove os espaços das duas pontas
+
+  SELECT upper(name) AS shout, length(name) AS size FROM customers;"""
+"textfn-1.prompt" = "Mostre o nome de cada cliente em maiúsculas (coluna upper_name) e quantos caracteres ele tem (coluna name_length)."
+"textfn-1.hint1" = "Duas funções: upper() e length()."
+"textfn-1.hint2" = "SELECT upper(name) AS upper_name, length(name) AS name_length FROM customers;"
+"textfn-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"textfn-2.prompt" = "Mostre as 3 primeiras letras do nome de cada produto, em minúsculas, como code."
+"textfn-2.hint1" = "substr(name, 1, 3) pega os três primeiros caracteres; envolva em lower()."
+"textfn-2.hint2" = "SELECT lower(substr(name, 1, 3)) AS code FROM products;"
+"textfn-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"number-functions.title" = "Funções numéricas"
+"number-functions.theory" = """
+Os números têm suas próprias funções:
+
+  round(x, n)        arredonda para n casas decimais (round(x) arredonda para inteiro)
+  abs(x)             remove o sinal
+  max(a, b), min(a, b)   com dois ou mais argumentos escolhem um valor
+
+  SELECT name, round(price * 1.21, 1) AS with_tax FROM products;
+
+A divisão de dois inteiros é uma divisão inteira: 7 / 2 dá 3. Escreva 7 / 2.0 para obter 3.5."""
+"numfn-1.prompt" = "Mostre o nome de cada produto e seu preço mais 21% de imposto, arredondado para 1 casa decimal, como price_with_tax."
+"numfn-1.hint1" = "Multiplique por 1.21 e envolva o resultado em round(..., 1)."
+"numfn-1.hint2" = "SELECT name, round(price * 1.21, 1) AS price_with_tax FROM products;"
+"numfn-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"date-functions.title" = "Funções de data"
+"date-functions.theory" = """
+O SQLite não tem um tipo data: as datas são texto como 2024-03-15. As funções de data trabalham sobre esse texto:
+
+  date('2024-03-15', '+1 month')       2024-04-15
+  strftime('%Y-%m', '2024-03-15')       2024-03   (%Y ano, %m mês, %d dia)
+  date('now')                           hoje
+
+  SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;
+
+Como as datas ISO se ordenam como texto, WHERE ordered_at >= '2024-03-01' também funciona."""
+"datefn-1.prompt" = "Mostre o id de cada pedido e o ano e mês de sua data, como 2024-02, em uma coluna month."
+"datefn-1.hint1" = "strftime('%Y-%m', ...) formata uma data como ano-mês."
+"datefn-1.hint2" = "SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;"
+"datefn-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"datefn-2.prompt" = "Mostre o id e ordered_at dos pedidos feitos nos 30 dias anteriores a 2024-03-31 (a partir de 30 dias antes, inclusive)."
+"datefn-2.hint1" = "date('2024-03-31', '-30 days') dá a data de início."
+"datefn-2.hint2" = "SELECT id, ordered_at FROM orders WHERE ordered_at >= date('2024-03-31', '-30 days');"
+"datefn-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"aggregates.title" = "COUNT, SUM, AVG, MIN, MAX"
+"aggregates.theory" = """
+As funções de agregação reduzem muitas linhas a um único valor:
+
+  SELECT count(*) FROM orders;              linhas
+  SELECT count(email) FROM customers;       linhas onde email não é NULL
+  SELECT count(DISTINCT country) FROM customers;
+  SELECT sum(stock), avg(price), min(price), max(price) FROM products;
+
+count(*) conta linhas; count(coluna) ignora os NULL. As outras funções também ignoram os NULL."""
+"agg-1.prompt" = "Mostre em uma única linha quantos clientes existem (total) e quantos deles têm email (with_email)."
+"agg-1.hint1" = "count(*) conta todas as linhas, count(email) só as que não são NULL."
+"agg-1.hint2" = "SELECT count(*) AS total, count(email) AS with_email FROM customers;"
+"agg-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"agg-2.prompt" = "Mostre o preço mais baixo (min_price), o mais alto (max_price) e a média (avg_price) dos produtos."
+"agg-2.hint1" = "Três agregações em um SELECT: min(), max() e avg()."
+"agg-2.hint2" = "SELECT min(price) AS min_price, max(price) AS max_price, avg(price) AS avg_price FROM products;"
+"agg-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"group-by.title" = "GROUP BY: um resultado por grupo"
+"group-by.theory" = """
+O GROUP BY separa as linhas em grupos e as agregações são calculadas uma vez por grupo:
+
+  SELECT status, count(*) AS orders FROM orders GROUP BY status;
+  SELECT category, avg(price) AS avg_price FROM products GROUP BY category;
+
+Cada coluna do SELECT precisa estar no GROUP BY ou dentro de uma agregação. O WHERE filtra as linhas antes de agrupá-las."""
+"group-1.prompt" = "Mostre cada status de pedido e quantos pedidos o têm (coluna n)."
+"group-1.hint1" = "Agrupe por status e conte as linhas de cada grupo."
+"group-1.hint2" = "SELECT status, count(*) AS n FROM orders GROUP BY status;"
+"group-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"group-2.prompt" = "Mostre cada categoria de produto e o preço médio de seus produtos (avg_price)."
+"group-2.hint1" = "GROUP BY category com avg(price)."
+"group-2.hint2" = "SELECT category, avg(price) AS avg_price FROM products GROUP BY category;"
+"group-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"having.title" = "HAVING: filtrar grupos"
+"having.theory" = """
+O WHERE não pode usar agregações porque roda antes de os grupos existirem. Para filtrar grupos, use HAVING:
+
+  SELECT category, count(*) AS n
+  FROM products
+  GROUP BY category
+  HAVING count(*) > 2;
+
+A ordem é: FROM, WHERE (linhas), GROUP BY, HAVING (grupos), SELECT, ORDER BY, LIMIT."""
+"having-1.prompt" = "Mostre as categorias que têm mais de 2 produtos, com a quantidade de produtos (n)."
+"having-1.hint1" = "Agrupe por category e fique com os grupos que cumpram HAVING count(*) > 2."
+"having-1.hint2" = "SELECT category, count(*) AS n FROM products GROUP BY category HAVING count(*) > 2;"
+"having-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"having-2.prompt" = "Em order_items, mostre cada product_id com a quantidade total vendida (total), mantendo só os produtos com total acima de 5."
+"having-2.hint1" = "sum(quantity) por produto e depois HAVING sobre essa soma."
+"having-2.hint2" = "SELECT product_id, sum(quantity) AS total FROM order_items GROUP BY product_id HAVING sum(quantity) > 5;"
+"having-2.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"coalesce-cast.title" = "COALESCE e CAST"
+"coalesce-cast.theory" = """
+coalesce(a, b, ...) devolve o primeiro valor que não é NULL, a forma padrão de dar um valor padrão:
+
+  SELECT name, coalesce(email, 'no email') AS contact FROM customers;
+
+CAST(x AS tipo) converte um valor para INTEGER, REAL ou TEXT:
+
+  SELECT CAST(price AS INTEGER) FROM products;     -- 3.5 vira 3 (os decimais são cortados)
+  SELECT CAST(42 AS TEXT) || ' items';
+
+Parentes: ifnull(a, b) é coalesce com dois argumentos e nullif(a, b) dá NULL quando a = b."""
+"coalesce-1.prompt" = "Mostre o nome de cada cliente e seu email, ou o texto unknown quando não tem (coluna contact)."
+"coalesce-1.hint1" = "coalesce(email, 'unknown') escolhe o primeiro valor que não é NULL."
+"coalesce-1.hint2" = "SELECT name, coalesce(email, 'unknown') AS contact FROM customers;"
+"coalesce-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."
+"cast-1.prompt" = "Mostre o nome de cada produto e seu preço convertido para inteiro com CAST (coluna whole_price)."
+"cast-1.hint1" = "CAST(price AS INTEGER)."
+"cast-1.hint2" = "SELECT name, CAST(price AS INTEGER) AS whole_price FROM products;"
+"cast-1.check1.fail" = "Sua última consulta não devolve as linhas pedidas (ou você ainda não executou nenhuma). Corrija e execute de novo."

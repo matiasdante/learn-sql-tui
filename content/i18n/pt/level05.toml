@@ -1,0 +1,82 @@
+"insert.title" = "INSERT: adicionar linhas"
+"insert.theory" = """
+INSERT adiciona linhas. Nomeie as colunas e depois dê os valores na mesma ordem:
+
+  INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);
+
+As colunas que você omite recebem seu DEFAULT (ou NULL, ou o próximo número em um INTEGER PRIMARY KEY). Várias linhas de uma vez:
+
+  INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');
+
+Também dá para inserir o resultado de uma consulta: INSERT INTO archive SELECT * FROM tasks WHERE done = 1;
+
+Este nível altera dados: quando sua resposta está errada, o F5 deixa a tabela tasks como estava."""
+"insert-1.prompt" = "Adicione a tarefa 'Read a book' com prioridade 2 à tabela tasks."
+"insert-1.hint1" = "INSERT INTO tasks (title, priority) VALUES (...)."
+"insert-1.hint2" = "INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);"
+"insert-1.check1.fail" = "Ainda não existe uma tarefa 'Read a book' com prioridade 2 (e done = 0)."
+"insert-1.check2.fail" = "A tabela deveria ter exatamente uma linha nova."
+"insert-2.prompt" = "Adicione duas tarefas com um único INSERT: 'Water plants' e 'Clean desk'. Deixe as outras colunas receberem o valor padrão."
+"insert-2.hint1" = "Coloque as duas linhas depois de VALUES, separadas por vírgula, e preencha só a coluna title."
+"insert-2.hint2" = "INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');"
+"insert-2.check1.fail" = "Faltam as duas tarefas novas, ou elas não têm os valores padrão done = 0 e priority = 3."
+"insert-2.check2.fail" = "A tabela deveria ter exatamente duas linhas novas."
+"update.title" = "UPDATE: modificar linhas"
+"update.theory" = """
+UPDATE altera colunas das linhas que cumprem o WHERE:
+
+  UPDATE tasks SET done = 1 WHERE title = 'Pay rent';
+  UPDATE tasks SET priority = priority + 1, done = 0 WHERE id = 3;
+
+Cuidado: sem WHERE, o UPDATE altera todas as linhas da tabela. Antes de um UPDATE importante, execute o mesmo WHERE em um SELECT para ver quais linhas ele tocaria."""
+"update-1.prompt" = "Marque a tarefa 'Pay rent' como feita (done = 1) sem tocar em nenhuma outra tarefa."
+"update-1.hint1" = "UPDATE tasks SET done = 1 WHERE ..."
+"update-1.hint2" = "UPDATE tasks SET done = 1 WHERE title = 'Pay rent';"
+"update-1.check1.fail" = "'Pay rent' ainda não está marcada como feita."
+"update-1.check2.fail" = "Agora exatamente três tarefas devem estar feitas: as duas que já estavam e Pay rent."
+"update-2.prompt" = "Defina a prioridade 1 para todas as tarefas que ainda não estão feitas. Não altere as que já estão feitas."
+"update-2.hint1" = "O WHERE decide quais linhas mudam: done = 0."
+"update-2.hint2" = "UPDATE tasks SET priority = 1 WHERE done = 0;"
+"update-2.check1.fail" = "Todas as tarefas não feitas devem ter prioridade 1."
+"update-2.check2.fail" = "As tarefas que já estavam feitas devem manter sua prioridade."
+"delete.title" = "DELETE: remover linhas"
+"delete.theory" = """
+DELETE remove as linhas que cumprem o WHERE:
+
+  DELETE FROM tasks WHERE done = 1;
+
+Mesmo aviso do UPDATE: DELETE FROM tasks; sem WHERE esvazia a tabela. A tabela em si permanece; DROP TABLE remove a tabela (nível 6).
+
+Não há botão de desfazer. No nível 7 você vai aprender transações, que permitem testar um DELETE e fazer ROLLBACK se foi um erro."""
+"delete-1.prompt" = "Apague as tarefas que já estão feitas. As pendentes devem permanecer."
+"delete-1.hint1" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.hint2" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.check1.fail" = "Ainda restam tarefas com done = 1."
+"delete-1.check2.fail" = "As três tarefas pendentes devem continuar na tabela."
+"upsert.title" = "UPSERT: inserir ou atualizar"
+"upsert.theory" = """
+E se a linha pode existir ou não? O ON CONFLICT transforma um INSERT que falharia (chave duplicada) em uma atualização:
+
+  INSERT INTO counters (name, value) VALUES ('visits', 1)
+  ON CONFLICT (name) DO UPDATE SET value = value + 1;
+
+Se 'visits' não existe é inserida com 1; se existe, seu valor aumenta em 1. Dentro do DO UPDATE, excluded.value é o valor que você tentou inserir. Use DO NOTHING para simplesmente pular duplicatas. O alvo do conflito (name) deve ser uma coluna PRIMARY KEY ou UNIQUE."""
+"upsert-1.prompt" = "Registre mais uma visita na tabela counters: insira ('visits', 1) e, como 'visits' já existe, some 1 ao seu valor com ON CONFLICT. Deve terminar em 11."
+"upsert-1.hint1" = "INSERT ... ON CONFLICT (name) DO UPDATE SET value = value + 1."
+"upsert-1.hint2" = "INSERT INTO counters (name, value) VALUES ('visits', 1) ON CONFLICT (name) DO UPDATE SET value = value + 1;"
+"upsert-1.check1.fail" = "O contador 'visits' deveria valer 11."
+"upsert-1.check2.fail" = "Use INSERT ... ON CONFLICT como pedido."
+"returning.title" = "RETURNING: recuperar as linhas modificadas"
+"returning.theory" = """
+INSERT, UPDATE e DELETE podem devolver as linhas que tocaram com RETURNING, então não é preciso uma segunda consulta:
+
+  INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;
+  UPDATE tasks SET done = 1 WHERE priority = 1 RETURNING id, title;
+  DELETE FROM tasks WHERE done = 1 RETURNING title;
+
+É a forma limpa de saber o id que o banco gerou para uma linha nova. O resultado aparece como uma tabela, igual a um SELECT."""
+"returning-1.prompt" = "Adicione a tarefa 'Plan trip' e faça a mesma instrução devolver o id que o banco gerou para ela."
+"returning-1.hint1" = "Adicione RETURNING id ao final do INSERT."
+"returning-1.hint2" = "INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;"
+"returning-1.check1.fail" = "A tarefa 'Plan trip' ainda não está na tabela."
+"returning-1.check2.fail" = "Use RETURNING no INSERT como pedido."

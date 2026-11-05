@@ -1,0 +1,14 @@
+id = "cross-join"
+level = 3
+order = 4
+
+[[exercise]]
+id = "cross-1"
+hints = 2
+solution = ["SELECT s.label AS size, c.label AS color FROM sizes s CROSS JOIN colors c;"]
+setup = [
+  { do = "sql", script = "CREATE TABLE sizes (label TEXT); INSERT INTO sizes VALUES ('S'), ('M'), ('L'); CREATE TABLE colors (label TEXT); INSERT INTO colors VALUES ('red'), ('blue');" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT s.label AS size, c.label AS color FROM sizes s CROSS JOIN colors c" },
+]

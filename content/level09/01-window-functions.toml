@@ -1,0 +1,25 @@
+id = "window-functions"
+level = 9
+order = 1
+
+[[exercise]]
+id = "win-1"
+hints = 2
+solution = ["SELECT name, department_id, salary, RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees WHERE department_id IS NOT NULL;"]
+setup = [
+  { do = "seed", name = "company" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, department_id, salary, RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees WHERE department_id IS NOT NULL" },
+]
+
+[[exercise]]
+id = "win-2"
+hints = 2
+solution = ["SELECT name, hired_at, SUM(salary) OVER (ORDER BY hired_at, id) AS running_payroll FROM employees;"]
+setup = [
+  { do = "seed", name = "company" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, hired_at, SUM(salary) OVER (ORDER BY hired_at, id) AS running_payroll FROM employees" },
+]

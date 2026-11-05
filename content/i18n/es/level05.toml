@@ -1,0 +1,82 @@
+"insert.title" = "INSERT: agregar filas"
+"insert.theory" = """
+INSERT agrega filas. Nombrá las columnas y después dá los valores en el mismo orden:
+
+  INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);
+
+Las columnas que omitís toman su DEFAULT (o NULL, o el siguiente número en un INTEGER PRIMARY KEY). Varias filas a la vez:
+
+  INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');
+
+También podés insertar el resultado de una consulta: INSERT INTO archive SELECT * FROM tasks WHERE done = 1;
+
+Este nivel cambia datos: cuando tu respuesta es incorrecta, F5 deja la tabla tasks como estaba."""
+"insert-1.prompt" = "Agregá la tarea 'Read a book' con prioridad 2 a la tabla tasks."
+"insert-1.hint1" = "INSERT INTO tasks (title, priority) VALUES (...)."
+"insert-1.hint2" = "INSERT INTO tasks (title, priority) VALUES ('Read a book', 2);"
+"insert-1.check1.fail" = "Todavía no hay una tarea 'Read a book' con prioridad 2 (y done = 0)."
+"insert-1.check2.fail" = "La tabla debería tener exactamente una fila nueva."
+"insert-2.prompt" = "Agregá dos tareas con un solo INSERT: 'Water plants' y 'Clean desk'. Dejá que las otras columnas tomen su valor por defecto."
+"insert-2.hint1" = "Poné las dos filas después de VALUES, separadas por coma, y completá solo la columna title."
+"insert-2.hint2" = "INSERT INTO tasks (title) VALUES ('Water plants'), ('Clean desk');"
+"insert-2.check1.fail" = "Faltan las dos tareas nuevas, o no tienen los valores por defecto done = 0 y priority = 3."
+"insert-2.check2.fail" = "La tabla debería tener exactamente dos filas nuevas."
+"update.title" = "UPDATE: modificar filas"
+"update.theory" = """
+UPDATE cambia columnas de las filas que cumplen el WHERE:
+
+  UPDATE tasks SET done = 1 WHERE title = 'Pay rent';
+  UPDATE tasks SET priority = priority + 1, done = 0 WHERE id = 3;
+
+Cuidado: sin WHERE, UPDATE cambia todas las filas de la tabla. Antes de un UPDATE importante, ejecutá el mismo WHERE en un SELECT para ver qué filas tocaría."""
+"update-1.prompt" = "Marcá la tarea 'Pay rent' como hecha (done = 1) sin tocar ninguna otra tarea."
+"update-1.hint1" = "UPDATE tasks SET done = 1 WHERE ..."
+"update-1.hint2" = "UPDATE tasks SET done = 1 WHERE title = 'Pay rent';"
+"update-1.check1.fail" = "'Pay rent' todavía no está marcada como hecha."
+"update-1.check2.fail" = "Ahora deberían estar hechas exactamente tres tareas: las dos que ya lo estaban y Pay rent."
+"update-2.prompt" = "Poné prioridad 1 a todas las tareas que todavía no están hechas. No cambies las que ya están hechas."
+"update-2.hint1" = "El WHERE decide qué filas cambian: done = 0."
+"update-2.hint2" = "UPDATE tasks SET priority = 1 WHERE done = 0;"
+"update-2.check1.fail" = "Todas las tareas no hechas deben tener prioridad 1."
+"update-2.check2.fail" = "Las tareas que ya estaban hechas tienen que conservar su prioridad."
+"delete.title" = "DELETE: borrar filas"
+"delete.theory" = """
+DELETE borra las filas que cumplen el WHERE:
+
+  DELETE FROM tasks WHERE done = 1;
+
+Misma advertencia que UPDATE: DELETE FROM tasks; sin WHERE vacía la tabla. La tabla en sí queda; DROP TABLE borra la tabla (nivel 6).
+
+No hay botón de deshacer. En el nivel 7 vas a aprender transacciones, que permiten probar un DELETE y hacer ROLLBACK si fue un error."""
+"delete-1.prompt" = "Borrá las tareas que ya están hechas. Las pendientes tienen que quedar."
+"delete-1.hint1" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.hint2" = "DELETE FROM tasks WHERE done = 1;"
+"delete-1.check1.fail" = "Todavía quedan tareas con done = 1."
+"delete-1.check2.fail" = "Las tres tareas pendientes tienen que seguir en la tabla."
+"upsert.title" = "UPSERT: insertar o actualizar"
+"upsert.theory" = """
+¿Y si la fila puede existir o no? ON CONFLICT convierte un INSERT que fallaría (clave duplicada) en una actualización:
+
+  INSERT INTO counters (name, value) VALUES ('visits', 1)
+  ON CONFLICT (name) DO UPDATE SET value = value + 1;
+
+Si 'visits' no existe se inserta con 1; si existe, su valor aumenta en 1. Dentro de DO UPDATE, excluded.value es el valor que intentaste insertar. Usá DO NOTHING para saltear duplicados sin más. El objetivo del conflicto (name) debe ser una columna PRIMARY KEY o UNIQUE."""
+"upsert-1.prompt" = "Registrá una visita más en la tabla counters: insertá ('visits', 1) y, como 'visits' ya existe, sumale 1 a su valor con ON CONFLICT. Tiene que quedar en 11."
+"upsert-1.hint1" = "INSERT ... ON CONFLICT (name) DO UPDATE SET value = value + 1."
+"upsert-1.hint2" = "INSERT INTO counters (name, value) VALUES ('visits', 1) ON CONFLICT (name) DO UPDATE SET value = value + 1;"
+"upsert-1.check1.fail" = "El contador 'visits' debería valer 11."
+"upsert-1.check2.fail" = "Usá INSERT ... ON CONFLICT como se pidió."
+"returning.title" = "RETURNING: recuperar las filas modificadas"
+"returning.theory" = """
+INSERT, UPDATE y DELETE pueden devolver las filas que tocaron con RETURNING, así que no hace falta una segunda consulta:
+
+  INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;
+  UPDATE tasks SET done = 1 WHERE priority = 1 RETURNING id, title;
+  DELETE FROM tasks WHERE done = 1 RETURNING title;
+
+Es la forma prolija de saber el id que la base generó para una fila nueva. El resultado aparece como una tabla, igual que un SELECT."""
+"returning-1.prompt" = "Agregá la tarea 'Plan trip' y hacé que la misma sentencia devuelva el id que la base generó para ella."
+"returning-1.hint1" = "Agregá RETURNING id al final del INSERT."
+"returning-1.hint2" = "INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;"
+"returning-1.check1.fail" = "La tarea 'Plan trip' todavía no está en la tabla."
+"returning-1.check2.fail" = "Usá RETURNING en el INSERT como se pidió."

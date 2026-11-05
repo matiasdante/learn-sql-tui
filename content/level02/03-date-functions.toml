@@ -1,0 +1,25 @@
+id = "date-functions"
+level = 2
+order = 3
+
+[[exercise]]
+id = "datefn-1"
+hints = 2
+solution = ["SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT id, strftime('%Y-%m', ordered_at) AS month FROM orders" },
+]
+
+[[exercise]]
+id = "datefn-2"
+hints = 2
+solution = ["SELECT id, ordered_at FROM orders WHERE ordered_at >= date('2024-03-31', '-30 days');"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT id, ordered_at FROM orders WHERE ordered_at >= date('2024-03-31', '-30 days')" },
+]

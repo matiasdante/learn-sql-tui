@@ -1,0 +1,27 @@
+id = "partial-expression-indexes"
+level = 8
+order = 3
+
+[[exercise]]
+id = "pindex-1"
+hints = 2
+solution = ["CREATE INDEX idx_pending ON orders (customer_id) WHERE status = 'pending';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "index_exists", name = "idx_pending", table = "orders" },
+  { type = "query_equals", sql = "SELECT sql LIKE '%WHERE%pending%' FROM sqlite_schema WHERE name = 'idx_pending'", rows = [["1"]] },
+]
+
+[[exercise]]
+id = "eindex-1"
+hints = 2
+solution = ["CREATE INDEX idx_customers_lower_name ON customers (lower(name));"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "index_exists", name = "idx_customers_lower_name", table = "customers" },
+  { type = "query_equals", sql = "SELECT sql LIKE '%lower(%' FROM sqlite_schema WHERE name = 'idx_customers_lower_name'", rows = [["1"]] },
+]

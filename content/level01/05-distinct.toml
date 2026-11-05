@@ -1,0 +1,14 @@
+id = "distinct"
+level = 1
+order = 5
+
+[[exercise]]
+id = "distinct-1"
+hints = 2
+solution = ["SELECT DISTINCT country FROM customers;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT DISTINCT country FROM customers" },
+]

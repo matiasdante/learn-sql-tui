@@ -1,0 +1,15 @@
+id = "returning"
+level = 5
+order = 5
+
+[[exercise]]
+id = "returning-1"
+hints = 2
+solution = ["INSERT INTO tasks (title) VALUES ('Plan trip') RETURNING id;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT title FROM tasks WHERE id > 5", rows = [["Plan trip"]] },
+  { type = "ran", any = ["RETURNING"] },
+]

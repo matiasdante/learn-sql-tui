@@ -1,0 +1,153 @@
+"create-table.title" = "CREATE TABLE"
+"create-table.theory" = """
+CREATE TABLE 用来定义表：先写表名，再写每一列的类型和约束：
+
+  CREATE TABLE books (
+    id    INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    year  INTEGER
+  );
+
+PRIMARY KEY 用来标识每一行（INTEGER PRIMARY KEY 会自动填充 1、2、3……）。NOT NULL 禁止缺失值。DEFAULT 在 INSERT 省略该列时提供一个值。CHECK 会拒绝违反规则的值：
+
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned'))
+
+用 .schema books 可以查看一张表是怎么创建的。"""
+"create-1.prompt" = "创建表 books，包含：id（INTEGER，主键）、title（TEXT，必填）和 year（INTEGER）。"
+"create-1.hint1" = "必填就是 NOT NULL。"
+"create-1.hint2" = "CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, year INTEGER);"
+"create-1.check1.fail" = "表 books 还不存在。"
+"create-1.check2.fail" = "books.id 必须是 INTEGER PRIMARY KEY。"
+"create-1.check3.fail" = "books.title 必须是 TEXT NOT NULL。"
+"create-1.check4.fail" = "books.year 必须是 INTEGER 列。"
+"create-2.prompt" = "创建表 members，包含：name（TEXT，必填）、status（TEXT，必填，默认 'active'，并用 CHECK 只允许 'active' 或 'banned'）以及 points（INTEGER，默认 0）。"
+"create-2.hint1" = "status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned'))。"
+"create-2.hint2" = "CREATE TABLE members (name TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'banned')), points INTEGER DEFAULT 0);"
+"create-2.check1.fail" = "表 members 还不存在。"
+"create-2.check2.fail" = "members.name 必须是 NOT NULL。"
+"create-2.check3.fail" = "members.status 需要 DEFAULT 'active'。"
+"create-2.check4.fail" = "members.status 必须是 NOT NULL。"
+"create-2.check5.fail" = "members.points 需要 DEFAULT 0。"
+"create-2.check6.fail" = "请为 status 添加 CHECK 约束。"
+"types-strict.title" = "类型与 STRICT 表"
+"types-strict.theory" = """
+SQLite 对类型很宽松：列只有“亲和性”（偏好的类型），没有硬性规则。你可以把文本 'hello' 存进 INTEGER 列，它也会接受。存储类别有 NULL、INTEGER、REAL、TEXT 和 BLOB；typeof(x) 可以告诉你一个值属于哪一类。
+
+想要像其他数据库那样严格检查，在右括号后面加上 STRICT：
+
+  CREATE TABLE readings (
+    sensor TEXT,
+    value  REAL
+  ) STRICT;
+
+STRICT 表的列类型只能是 INT、INTEGER、REAL、TEXT、BLOB 和 ANY，并且会拒绝不匹配的值。试试：INSERT INTO readings VALUES ('a', 'not a number'); 会失败。"""
+"strict-1.prompt" = "创建 STRICT 表 readings，包含 TEXT 列 sensor 和 REAL 列 value。"
+"strict-1.hint1" = "STRICT 关键字写在右括号之后。"
+"strict-1.hint2" = "CREATE TABLE readings (sensor TEXT, value REAL) STRICT;"
+"strict-1.check1.fail" = "表 readings 还不存在。"
+"strict-1.check2.fail" = "readings.sensor 必须是 TEXT。"
+"strict-1.check3.fail" = "readings.value 必须是 REAL。"
+"strict-1.check4.fail" = "这张表必须声明为 STRICT。"
+"constraints.title" = "约束：UNIQUE、NOT NULL、CHECK"
+"constraints.theory" = """
+约束让数据库拒绝不合法的数据，不管是哪个程序在写入：
+
+  NOT NULL    值必须存在
+  UNIQUE      任意两行的值不能重复（会为它创建唯一索引）
+  CHECK(...)  条件必须为真
+  PRIMARY KEY 唯一且用来标识这一行
+
+  CREATE TABLE users (
+    id    INTEGER PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    age   INTEGER CHECK (age >= 0)
+  );
+
+违反约束的 INSERT 或 UPDATE 会失败，并报错如 UNIQUE constraint failed: users.email，而且什么都不会写入。在这里设定的规则能保护数据不受任何应用程序的破坏。"""
+"constraints-1.prompt" = "创建表 users，包含：id（INTEGER 主键）、email（TEXT，必填且唯一）和 age（INTEGER，用 CHECK 只允许 0 或更大的值）。"
+"constraints-1.hint1" = "email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0)。"
+"constraints-1.hint2" = "CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0));"
+"constraints-1.check1.fail" = "表 users 还不存在。"
+"constraints-1.check2.fail" = "users.id 必须是主键。"
+"constraints-1.check3.fail" = "users.email 必须是 NOT NULL。"
+"constraints-1.check4.fail" = "users.email 必须是 UNIQUE。"
+"constraints-1.check5.fail" = "请为 age 添加 CHECK 约束。"
+"foreign-keys.title" = "外键与 ON DELETE"
+"foreign-keys.theory" = """
+外键让一列指向另一张表的主键，这样就不会出现作者不存在的文章：
+
+  CREATE TABLE posts (
+    id        INTEGER PRIMARY KEY,
+    author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
+    title     TEXT
+  );
+
+ON DELETE 指定删除父行时发生什么：
+  NO ACTION / RESTRICT   拒绝删除（默认）
+  CASCADE                同时删除子行
+  SET NULL               把子行的该列设为 NULL
+  SET DEFAULT            设为该列的默认值
+
+重要：只有在 PRAGMA foreign_keys = ON 时（第 7 级），SQLite 才会强制执行外键。"""
+"fk-1.prompt" = "表 authors 已经存在。请创建表 posts，包含 id（INTEGER 主键）、author_id（INTEGER，必填，引用 authors(id)，删除作者时同时删除其文章）和 title（TEXT）。"
+"fk-1.hint1" = "author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE。"
+"fk-1.hint2" = "CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE, title TEXT);"
+"fk-1.check1.fail" = "表 posts 还不存在。"
+"fk-1.check2.fail" = "posts.author_id 必须是 NOT NULL。"
+"fk-1.check3.fail" = "posts.author_id 必须引用 authors(id)。"
+"fk-1.check4.fail" = "请给外键加上 ON DELETE CASCADE。"
+"alter-table.title" = "ALTER TABLE"
+"alter-table.theory" = """
+ALTER TABLE 用来修改已经有数据的表：
+
+  ALTER TABLE tasks ADD COLUMN due_date TEXT;          新列（已有的行得到 NULL）
+  ALTER TABLE tasks RENAME COLUMN title TO name;
+  ALTER TABLE tasks RENAME TO todos;
+  ALTER TABLE tasks DROP COLUMN priority;
+
+ADD COLUMN 有限制：新增的 NOT NULL 列必须带 DEFAULT，也不能是 PRIMARY KEY 或 UNIQUE。更大的改动要先建新表，用 INSERT ... SELECT 复制数据，再删除旧表并重命名新表。"""
+"alter-1.prompt" = "给 tasks 表添加一个名为 due_date 的 TEXT 列，并保留原有的 5 行。"
+"alter-1.hint1" = "ALTER TABLE tasks ADD COLUMN ..."
+"alter-1.hint2" = "ALTER TABLE tasks ADD COLUMN due_date TEXT;"
+"alter-1.check1.fail" = "tasks 需要一个名为 due_date 的 TEXT 列。"
+"alter-1.check2.fail" = "原来的 5 行必须保留。"
+"alter-2.prompt" = "把 tasks 表的列 title 重命名为 name，然后再把表 tasks 重命名为 todos。"
+"alter-2.hint1" = "两条语句：RENAME COLUMN ... TO ...，然后 RENAME TO ..."
+"alter-2.hint2" = "ALTER TABLE tasks RENAME COLUMN title TO name;\nALTER TABLE tasks RENAME TO todos;"
+"alter-2.check1.fail" = "这张表必须叫 todos。"
+"alter-2.check2.fail" = "旧名称 tasks 不应再存在。"
+"alter-2.check3.fail" = "这一列必须叫 name。"
+"alter-2.check4.fail" = "必须保留这 5 行。"
+"drop.title" = "DROP：删除表"
+"drop.theory" = """
+DROP TABLE 会删除整张表，连同它的所有行、索引和触发器：
+
+  DROP TABLE counters;
+  DROP TABLE IF EXISTS counters;     -- 即使已经不存在也不会报错
+
+此外还有 DROP VIEW、DROP INDEX 和 DROP TRIGGER。没有撤销功能（除非是尚未提交的事务，或者有备份）。如果其他表用外键引用它，且 PRAGMA foreign_keys 为 ON，SQLite 会检查删除后是否会留下孤儿行。"""
+"drop-1.prompt" = "彻底删除 counters 表，tasks 表必须保留。"
+"drop-1.hint1" = "DROP TABLE counters;"
+"drop-1.hint2" = "DROP TABLE counters;"
+"drop-1.check1.fail" = "表 counters 仍然存在。"
+"drop-1.check2.fail" = "不要删除 tasks。"
+"generated-columns.title" = "生成列"
+"generated-columns.theory" = """
+生成列由同一行的其他列计算而来，所以永远不会与它们不同步：
+
+  CREATE TABLE items (
+    price REAL,
+    qty   INTEGER,
+    total REAL GENERATED ALWAYS AS (price * qty) VIRTUAL
+  );
+
+VIRTUAL 列在读取时计算；STORED 列在写入行时保存到磁盘（并且可以建索引）。不能向生成列 INSERT 数据。ALTER TABLE ... ADD COLUMN 可以添加 VIRTUAL 列：
+
+  ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);
+
+生成列有时不会出现在 SELECT * 的结果中，请按列名查询。"""
+"generated-1.prompt" = "表 items 有 price 和 qty 两列。请添加一个生成列 total，其值始终等于 price * qty。"
+"generated-1.hint1" = "ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"
+"generated-1.hint2" = "ALTER TABLE items ADD COLUMN total REAL GENERATED ALWAYS AS (price * qty);"
+"generated-1.check1.fail" = "items 需要一个名为 total 的生成列。"
+"generated-1.check2.fail" = "每一行的 total 都必须等于 price * qty。"

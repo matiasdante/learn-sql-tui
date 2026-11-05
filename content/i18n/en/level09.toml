@@ -1,0 +1,79 @@
+"window-functions.title" = "Window functions"
+"window-functions.theory" = """
+A window function calculates over a set of related rows but, unlike GROUP BY, keeps every row. OVER (...) defines the window:
+
+  SELECT name, department_id, salary,
+         RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS pos
+  FROM employees;
+
+PARTITION BY splits the rows into groups (like GROUP BY) and ORDER BY sorts inside each one. Useful functions: ROW_NUMBER(), RANK() (ties share a position), DENSE_RANK(), LAG(x), LEAD(x) and any aggregate used with OVER:
+
+  SUM(salary) OVER (ORDER BY hired_at)       -- running total"""
+"win-1.prompt" = "Show name, department_id, salary and salary_rank for the employees that have a department. salary_rank is the RANK() of the salary inside the department, highest salary first."
+"win-1.hint1" = "RANK() OVER (PARTITION BY department_id ORDER BY salary DESC), and WHERE department_id IS NOT NULL."
+"win-1.hint2" = "SELECT name, department_id, salary, RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees WHERE department_id IS NOT NULL;"
+"win-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"win-2.prompt" = "Show name, hired_at and running_payroll: the running total of salaries in order of hiring (use the id to break ties)."
+"win-2.hint1" = "SUM(salary) OVER (ORDER BY hired_at, id)."
+"win-2.hint2" = "SELECT name, hired_at, SUM(salary) OVER (ORDER BY hired_at, id) AS running_payroll FROM employees;"
+"win-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"triggers.title" = "Triggers"
+"triggers.theory" = """
+A trigger runs SQL by itself when a row is inserted, updated or deleted. Inside it, OLD is the row before and NEW the row after:
+
+  CREATE TRIGGER price_audit
+  AFTER UPDATE OF price ON products
+  BEGIN
+    INSERT INTO price_log (product_id, old_price, new_price)
+    VALUES (OLD.id, OLD.price, NEW.price);
+  END;
+
+Typical uses: audit logs, keeping derived data up to date, and blocking changes with SELECT RAISE(ABORT, 'message') inside a BEFORE trigger. The whole CREATE TRIGGER is one statement: the console waits for END; before running it. Remove it with DROP TRIGGER."""
+"trigger-1.prompt" = "Create a trigger price_audit that, after the price of a product changes, inserts its id, old price and new price into price_log. Then change the price of the product 1 (Pen) to 1.5 so the trigger records it."
+"trigger-1.hint1" = "CREATE TRIGGER ... AFTER UPDATE OF price ON products BEGIN INSERT ... VALUES (OLD.id, OLD.price, NEW.price); END;"
+"trigger-1.hint2" = "CREATE TRIGGER price_audit AFTER UPDATE OF price ON products BEGIN INSERT INTO price_log (product_id, old_price, new_price) VALUES (OLD.id, OLD.price, NEW.price); END;\nUPDATE products SET price = 1.5 WHERE id = 1;"
+"trigger-1.check1.fail" = "The trigger price_audit on products does not exist yet."
+"trigger-1.check2.fail" = "price_log should have one row: product 1, from 1.2 to 1.5. Change the price after creating the trigger."
+"trigger-1.check3.fail" = "The price of product 1 must be 1.5."
+"json.title" = "JSON in SQLite"
+"json.theory" = """
+SQLite stores JSON as text and has functions to read it:
+
+  json_extract(payload, '$.user')        value at a path
+  payload ->> '$.user'                   the same, shorter
+  json_array_length(payload, '$.tags')   length of an array
+  json_each(payload, '$.tags')           one row per element (a table-valued function)
+  json_valid(x)                          is it valid JSON?
+
+  SELECT e.id, t.value
+  FROM events e, json_each(e.payload, '$.tags') AS t;
+
+Paths start with $; use .key for objects and [0] for array positions. JSON is handy for loose data, but relational columns are better for what you filter and join on."""
+"json-1.prompt" = "The column payload of events holds JSON. Show the id of each event and the user inside the JSON (column user)."
+"json-1.hint1" = "json_extract(payload, '$.user') or payload ->> '$.user'."
+"json-1.hint2" = "SELECT id, json_extract(payload, '$.user') AS user FROM events;"
+"json-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"json-2.prompt" = "Show one row per tag of each event: the event id (id) and the tag (tag). Events without tags do not appear."
+"json-2.hint1" = "FROM events e, json_each(e.payload, '$.tags') AS t and select t.value."
+"json-2.hint2" = "SELECT e.id, t.value AS tag FROM events e, json_each(e.payload, '$.tags') AS t;"
+"json-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"fts5.title" = "Full-text search with FTS5"
+"fts5.theory" = """
+LIKE '%word%' reads every row and cannot rank results. FTS5 builds a full-text index in a virtual table:
+
+  CREATE VIRTUAL TABLE docs USING fts5(title, body);
+  INSERT INTO docs VALUES ('Joins', 'A join combines rows from two tables');
+  SELECT title FROM docs WHERE docs MATCH 'rows';
+  SELECT title FROM docs WHERE docs MATCH 'body:join OR title:index' ORDER BY rank;
+
+MATCH understands words, AND / OR / NOT, "exact phrases", prefixes (data*) and column filters (title:sql). ORDER BY rank sorts by relevance. FTS5 is part of the SQLite embedded in this program."""
+"fts-1.prompt" = "Using full-text search (MATCH), show the title of the documents of docs that mention the word fast."
+"fts-1.hint1" = "WHERE docs MATCH 'fast' (the table name is the left side of MATCH)."
+"fts-1.hint2" = "SELECT title FROM docs WHERE docs MATCH 'fast';"
+"fts-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"fts-1.check2.fail" = "Use MATCH as asked."
+"fts-2.prompt" = "Create an FTS5 virtual table called notes with the columns title and body, and insert two notes into it."
+"fts-2.hint1" = "CREATE VIRTUAL TABLE notes USING fts5(title, body);"
+"fts-2.hint2" = "CREATE VIRTUAL TABLE notes USING fts5(title, body);\nINSERT INTO notes VALUES ('Shopping', 'milk and eggs'), ('Ideas', 'learn full-text search');"
+"fts-2.check1.fail" = "notes must be a virtual table USING fts5."
+"fts-2.check2.fail" = "notes should contain exactly two notes."

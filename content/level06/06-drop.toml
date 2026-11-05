@@ -1,0 +1,15 @@
+id = "drop"
+level = 6
+order = 6
+
+[[exercise]]
+id = "drop-1"
+hints = 2
+solution = ["DROP TABLE counters;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "table_missing", name = "counters" },
+  { type = "table_exists", name = "tasks" },
+]

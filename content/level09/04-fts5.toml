@@ -1,0 +1,24 @@
+id = "fts5"
+level = 9
+order = 4
+
+[[exercise]]
+id = "fts-1"
+hints = 2
+solution = ["SELECT title FROM docs WHERE docs MATCH 'fast';"]
+setup = [
+  { do = "sql", script = "CREATE VIRTUAL TABLE docs USING fts5(title, body);\nINSERT INTO docs VALUES\n  ('SQLite intro', 'SQLite is a small, fast, reliable database engine'),\n  ('Joins', 'A join combines rows from two tables'),\n  ('Indexes', 'An index makes searches fast without scanning the whole table'),\n  ('Window functions', 'Window functions compute values across related rows');" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT title FROM docs WHERE body LIKE '%fast%'" },
+  { type = "ran", any = ["MATCH"] },
+]
+
+[[exercise]]
+id = "fts-2"
+hints = 2
+solution = ["CREATE VIRTUAL TABLE notes USING fts5(title, body);\nINSERT INTO notes VALUES ('Shopping', 'milk and eggs'), ('Ideas', 'learn full-text search');"]
+checks = [
+  { type = "query_equals", sql = "SELECT sql LIKE '%fts5%' FROM sqlite_schema WHERE name = 'notes'", rows = [["1"]] },
+  { type = "row_count", table = "notes", count = 2 },
+]

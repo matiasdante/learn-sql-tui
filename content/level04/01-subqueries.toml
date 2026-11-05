@@ -1,0 +1,25 @@
+id = "subqueries"
+level = 4
+order = 1
+
+[[exercise]]
+id = "subq-1"
+hints = 2
+solution = ["SELECT name, price FROM products WHERE price > (SELECT avg(price) FROM products);"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, price FROM products WHERE price > (SELECT avg(price) FROM products)" },
+]
+
+[[exercise]]
+id = "subq-2"
+hints = 2
+solution = ["SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders);"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers WHERE id IN (SELECT customer_id FROM orders)" },
+]

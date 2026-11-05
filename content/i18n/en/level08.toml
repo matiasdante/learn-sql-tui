@@ -1,0 +1,86 @@
+"views.title" = "Views: saved queries"
+"views.theory" = """
+A view is a SELECT with a name. It stores no data: every time you query the view, the SELECT runs on the current tables.
+
+  CREATE VIEW pending_orders AS
+    SELECT o.id, c.name
+    FROM orders o JOIN customers c ON c.id = o.customer_id
+    WHERE o.status = 'pending';
+
+  SELECT * FROM pending_orders;
+
+Views hide complexity (long joins), give stable names to a calculation and let you expose only some columns. Remove one with DROP VIEW. You choose the column names with CREATE VIEW v (a, b) AS ... or with aliases in the SELECT."""
+"view-1.prompt" = "Create a view called customer_orders with each customer's name and the number of orders they placed, in columns name and orders. Customers without orders must show 0."
+"view-1.hint1" = "CREATE VIEW customer_orders AS SELECT ... LEFT JOIN ... GROUP BY ..."
+"view-1.hint2" = "CREATE VIEW customer_orders AS SELECT c.name AS name, count(o.id) AS orders FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id;"
+"view-1.check1.fail" = "The view customer_orders does not exist yet."
+"view-1.check2.fail" = "The view must return name and orders for all 9 customers (0 for those without orders)."
+"indexes.title" = "Indexes"
+"indexes.theory" = """
+An index is a sorted copy of one or more columns that lets the database find rows without reading the whole table, like the index of a book:
+
+  CREATE INDEX idx_orders_customer ON orders (customer_id);
+  CREATE UNIQUE INDEX idx_customers_email ON customers (email);
+
+Queries that filter or join on indexed columns get much faster. The price: the index uses space and every INSERT, UPDATE and DELETE must keep it updated. So index the columns you search by, not everything. PRIMARY KEY and UNIQUE create their own indexes. DROP INDEX removes one; .indexes lists them."""
+"index-1.prompt" = "Create an index called idx_orders_customer on the column customer_id of orders."
+"index-1.hint1" = "CREATE INDEX name ON table (column);"
+"index-1.hint2" = "CREATE INDEX idx_orders_customer ON orders (customer_id);"
+"index-1.check1.fail" = "The index idx_orders_customer on orders does not exist yet."
+"index-1.check2.fail" = "The index must be on the column customer_id."
+"index-2.prompt" = "Create a UNIQUE index called idx_customers_email on the email column of customers, so that no two customers can share an email."
+"index-2.hint1" = "CREATE UNIQUE INDEX ..."
+"index-2.hint2" = "CREATE UNIQUE INDEX idx_customers_email ON customers (email);"
+"index-2.check1.fail" = "A UNIQUE index idx_customers_email on customers does not exist yet."
+"partial-expression-indexes.title" = "Partial and expression indexes"
+"partial-expression-indexes.theory" = """
+A partial index covers only the rows that satisfy a WHERE. It is smaller and faster to maintain when you always search a small subset:
+
+  CREATE INDEX idx_pending ON orders (customer_id) WHERE status = 'pending';
+
+An expression index stores the result of an expression, so searches on that expression can use it:
+
+  CREATE INDEX idx_name_lower ON customers (lower(name));
+  SELECT * FROM customers WHERE lower(name) = 'ada lovelace';   -- can use the index
+
+The query must write the same expression (and, for partial indexes, imply the same WHERE) for the planner to choose the index."""
+"pindex-1.prompt" = "Create a partial index called idx_pending on orders (customer_id) that only includes the orders whose status is 'pending'."
+"pindex-1.hint1" = "Add WHERE status = 'pending' at the end of CREATE INDEX."
+"pindex-1.hint2" = "CREATE INDEX idx_pending ON orders (customer_id) WHERE status = 'pending';"
+"pindex-1.check1.fail" = "The index idx_pending on orders does not exist yet."
+"pindex-1.check2.fail" = "The index must be partial: add WHERE status = 'pending'."
+"eindex-1.prompt" = "Create an expression index called idx_customers_lower_name on customers using lower(name)."
+"eindex-1.hint1" = "CREATE INDEX name ON customers (lower(name));"
+"eindex-1.hint2" = "CREATE INDEX idx_customers_lower_name ON customers (lower(name));"
+"eindex-1.check1.fail" = "The index idx_customers_lower_name does not exist yet."
+"eindex-1.check2.fail" = "The index must be on the expression lower(name)."
+"explain.title" = "EXPLAIN QUERY PLAN"
+"explain.theory" = """
+How do you know if a query uses an index? Ask for its plan:
+
+  EXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;
+
+Without an index you will read SCAN orders: the database walks every row. With an index on customer_id it becomes SEARCH orders USING INDEX idx_orders_customer (customer_id=?): it jumps straight to the matching rows.
+
+Read plans before and after creating an index to confirm that it helps. SCAN is fine for tiny tables; on big tables a SCAN in a frequent query is the first thing to fix."""
+"explain-1.prompt" = "Show the query plan of SELECT * FROM orders WHERE customer_id = 1 and read it: with no index it must say SCAN."
+"explain-1.hint1" = "EXPLAIN QUERY PLAN goes right before the SELECT."
+"explain-1.hint2" = "EXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;"
+"explain-1.check1.fail" = "Run EXPLAIN QUERY PLAN before the SELECT."
+"explain-2.prompt" = "Make that same query use an index: create one on orders(customer_id) and run EXPLAIN QUERY PLAN again to see SEARCH instead of SCAN."
+"explain-2.hint1" = "CREATE INDEX ... ON orders (customer_id); and then EXPLAIN QUERY PLAN SELECT ..."
+"explain-2.hint2" = "CREATE INDEX idx_orders_customer ON orders (customer_id);\nEXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = 1;"
+"explain-2.check1.fail" = "orders needs an index on customer_id."
+"explain-2.check2.fail" = "Run EXPLAIN QUERY PLAN to confirm that the plan changed."
+"analyze.title" = "ANALYZE and the planner"
+"analyze.theory" = """
+When several indexes could answer a query, the planner estimates which is cheaper. ANALYZE gathers statistics about your tables and indexes and stores them in the table sqlite_stat1 so those estimates are better:
+
+  ANALYZE;
+  SELECT * FROM sqlite_stat1;
+
+Run it after loading a lot of data or creating indexes. PRAGMA optimize does a cheap version of the same and is meant to be run before closing a long-lived connection. Statistics are only gathered for tables that have an index."""
+"analyze-1.prompt" = "The table orders has an index. Gather statistics for the database with ANALYZE."
+"analyze-1.hint1" = "Just ANALYZE; (and then look at sqlite_stat1 if you are curious)."
+"analyze-1.hint2" = "ANALYZE;"
+"analyze-1.check1.fail" = "There are no statistics for orders yet: run ANALYZE."

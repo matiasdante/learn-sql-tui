@@ -1,0 +1,26 @@
+id = "exists-correlated"
+level = 4
+order = 2
+
+[[exercise]]
+id = "exists-1"
+hints = 2
+solution = ["SELECT name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id AND o.status = 'pending');"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id AND o.status = 'pending')" },
+  { type = "ran", any = ["EXISTS"] },
+]
+
+[[exercise]]
+id = "corr-1"
+hints = 2
+solution = ["SELECT name, category, price FROM products p WHERE price > (SELECT avg(price) FROM products WHERE category = p.category);"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, category, price FROM products p WHERE price > (SELECT avg(price) FROM products WHERE category = p.category)" },
+]

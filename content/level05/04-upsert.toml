@@ -1,0 +1,15 @@
+id = "upsert"
+level = 5
+order = 4
+
+[[exercise]]
+id = "upsert-1"
+hints = 2
+solution = ["INSERT INTO counters (name, value) VALUES ('visits', 1) ON CONFLICT (name) DO UPDATE SET value = value + 1;"]
+setup = [
+  { do = "seed", name = "tasks" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT value FROM counters WHERE name = 'visits'", rows = [["11"]] },
+  { type = "ran", any = ["ON CONFLICT"] },
+]

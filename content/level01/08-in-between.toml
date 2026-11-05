@@ -1,0 +1,25 @@
+id = "in-between"
+level = 1
+order = 8
+
+[[exercise]]
+id = "in-1"
+hints = 2
+solution = ["SELECT name, category FROM products WHERE category IN ('furniture', 'accessories');"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, category FROM products WHERE category IN ('furniture', 'accessories')" },
+]
+
+[[exercise]]
+id = "between-1"
+hints = 2
+solution = ["SELECT id, ordered_at FROM orders WHERE ordered_at BETWEEN '2024-02-01' AND '2024-03-01';"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT id, ordered_at FROM orders WHERE ordered_at BETWEEN '2024-02-01' AND '2024-03-01'" },
+]

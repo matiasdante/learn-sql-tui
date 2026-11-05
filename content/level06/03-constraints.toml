@@ -1,0 +1,15 @@
+id = "constraints"
+level = 6
+order = 3
+
+[[exercise]]
+id = "constraints-1"
+hints = 2
+solution = ["CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 0));"]
+checks = [
+  { type = "table_exists", name = "users" },
+  { type = "column", table = "users", name = "id", pk = true },
+  { type = "column", table = "users", name = "email", notnull = true },
+  { type = "query_equals", sql = "SELECT count(*) FROM pragma_index_list('users') WHERE \"unique\" = 1 AND origin = 'u'", rows = [["1"]] },
+  { type = "query_equals", sql = "SELECT sql LIKE '%CHECK%' FROM sqlite_schema WHERE name = 'users'", rows = [["1"]] },
+]

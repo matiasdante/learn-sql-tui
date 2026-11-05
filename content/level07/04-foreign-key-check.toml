@@ -1,0 +1,16 @@
+id = "foreign-key-check"
+level = 7
+order = 4
+
+[[exercise]]
+id = "fkcheck-1"
+hints = 2
+solution = ["PRAGMA foreign_key_check;\nDELETE FROM posts WHERE rowid IN (SELECT rowid FROM pragma_foreign_key_check('posts'));"]
+setup = [
+  { do = "sql", script = "CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT NOT NULL); CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER NOT NULL REFERENCES authors(id), title TEXT); INSERT INTO authors VALUES (1, 'Ada'), (2, 'Grace'); INSERT INTO posts VALUES (1, 1, 'Engines'), (2, 2, 'Compilers'), (3, 9, 'Ghost post'), (4, 7, 'Another ghost');" },
+]
+checks = [
+  { type = "query_equals", sql = "SELECT count(*) FROM pragma_foreign_key_check", rows = [["0"]] },
+  { type = "row_count", table = "posts", count = 2 },
+  { type = "ran", any = ["foreign_key_check"] },
+]

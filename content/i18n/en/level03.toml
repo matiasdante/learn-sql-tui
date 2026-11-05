@@ -1,0 +1,92 @@
+"inner-join.title" = "INNER JOIN: combining tables"
+"inner-join.theory" = """
+Related data lives in different tables: an order only stores customer_id. A JOIN matches rows of two tables through a condition:
+
+  SELECT o.id, c.name
+  FROM orders AS o
+  JOIN customers AS c ON c.id = o.customer_id;
+
+JOIN is short for INNER JOIN: only the rows that find a match appear. Table aliases (o, c) keep it short and tell apart columns with the same name. Chain more JOINs to bring in more tables."""
+"join-1.prompt" = "Show each order id (order_id) with the name of the customer who placed it (customer)."
+"join-1.hint1" = "orders.customer_id points to customers.id."
+"join-1.hint2" = "SELECT o.id AS order_id, c.name AS customer FROM orders o JOIN customers c ON c.id = o.customer_id;"
+"join-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"join-2.prompt" = "For every line of every order, show the customer name, the product name and the quantity."
+"join-2.hint1" = "Start at order_items and JOIN orders, customers and products."
+"join-2.hint2" = "SELECT c.name, p.name, oi.quantity FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN customers c ON c.id = o.customer_id JOIN products p ON p.id = oi.product_id;"
+"join-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"left-join.title" = "LEFT JOIN: keeping unmatched rows"
+"left-join.theory" = """
+An INNER JOIN drops the rows without a match. LEFT JOIN keeps every row of the left table and fills the right side with NULL when nothing matches:
+
+  SELECT c.name, o.id
+  FROM customers c
+  LEFT JOIN orders o ON o.customer_id = c.id;
+
+Customers with no orders appear with o.id = NULL. That gives a classic pattern, "rows that have no related row":
+
+  ... LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;
+
+Use count(o.id) instead of count(*) to count 0 for those customers."""
+"left-1.prompt" = "Show every customer name with the number of orders they placed (column n). Customers without orders must appear with 0."
+"left-1.hint1" = "LEFT JOIN orders, GROUP BY the customer, and count a column of orders (count(o.id))."
+"left-1.hint2" = "SELECT c.name, count(o.id) AS n FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id;"
+"left-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"left-2.prompt" = "Show the names of the customers who have never placed an order."
+"left-2.hint1" = "After the LEFT JOIN, keep the rows where the order side is NULL."
+"left-2.hint2" = "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;"
+"left-2.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"right-full-join.title" = "RIGHT JOIN and FULL JOIN"
+"right-full-join.theory" = """
+RIGHT JOIN is LEFT JOIN seen from the other side: it keeps every row of the right table. FULL JOIN keeps the unmatched rows of both sides:
+
+  SELECT e.name, d.name FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;
+  SELECT e.name, d.name FROM employees e FULL  JOIN departments d ON d.id = e.department_id;
+
+In the company data, Legal has no employees and Jonas has no department. Both RIGHT JOIN and FULL JOIN need SQLite 3.39 or newer, which this program embeds. Many people just swap the tables and use LEFT JOIN instead."""
+"right-1.prompt" = "Show every department name (department) with the names of its employees (employee). Legal has none but must appear with NULL."
+"right-1.hint1" = "Either RIGHT JOIN from employees to departments, or LEFT JOIN from departments to employees."
+"right-1.hint2" = "SELECT d.name AS department, e.name AS employee FROM employees e RIGHT JOIN departments d ON d.id = e.department_id;"
+"right-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"full-1.prompt" = "Show every employee (employee) next to their department (department). Jonas, who has no department, and Legal, which has no employees, must both appear."
+"full-1.hint1" = "FULL JOIN keeps the unmatched rows of both tables."
+"full-1.hint2" = "SELECT e.name AS employee, d.name AS department FROM employees e FULL JOIN departments d ON d.id = e.department_id;"
+"full-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"cross-join.title" = "CROSS JOIN: every combination"
+"cross-join.theory" = """
+CROSS JOIN pairs every row of one table with every row of the other, with no condition. 3 sizes x 2 colors give 6 rows:
+
+  SELECT s.label, c.label FROM sizes s CROSS JOIN colors c;
+
+It is handy to generate combinations (variants of a product, a calendar grid), but it grows fast: 1000 x 1000 rows is a million. A JOIN whose ON condition is forgotten behaves the same way, so always check the row count."""
+"cross-1.prompt" = "Tables sizes and colors each have a label column. Show every combination of size and color (columns size and color)."
+"cross-1.hint1" = "A join without any ON condition."
+"cross-1.hint2" = "SELECT s.label AS size, c.label AS color FROM sizes s CROSS JOIN colors c;"
+"cross-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"self-join.title" = "Self join: a table with itself"
+"self-join.theory" = """
+Sometimes a table points to itself: employees.manager_id holds the id of another employee. To read both sides, use the same table twice with different aliases:
+
+  SELECT e.name AS employee, m.name AS manager
+  FROM employees e
+  LEFT JOIN employees m ON m.id = e.manager_id;
+
+LEFT JOIN keeps the top boss, whose manager_id is NULL."""
+"self-1.prompt" = "Show each employee (employee) with the name of their manager (manager). Alice has no manager and must appear with NULL."
+"self-1.hint1" = "Use employees twice (e and m) and LEFT JOIN on m.id = e.manager_id."
+"self-1.hint2" = "SELECT e.name AS employee, m.name AS manager FROM employees e LEFT JOIN employees m ON m.id = e.manager_id;"
+"self-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"using.title" = "USING: a shorter join"
+"using.theory" = """
+When the join column has the same name on both sides, USING saves typing and shows that column only once:
+
+  SELECT b.title, a.name
+  FROM books b
+  JOIN authors a USING (author_id);
+
+It is the same as ON b.author_id = a.author_id. NATURAL JOIN goes further and joins on every column with a common name, which is shorter but fragile: adding a column later can silently change the result. Prefer USING or ON."""
+"using-1.prompt" = "Tables books and authors share the column author_id. Show each book title with its author's name, joining them with USING."
+"using-1.hint1" = "JOIN authors USING (author_id)."
+"using-1.hint2" = "SELECT b.title, a.name FROM books b JOIN authors a USING (author_id);"
+"using-1.check1.fail" = "Your last query does not return the rows asked for (or you have not run one yet). Fix it and run it again."
+"using-1.check2.fail" = "Use JOIN ... USING (author_id) as asked."

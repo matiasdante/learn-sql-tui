@@ -1,0 +1,14 @@
+id = "integrity"
+level = 10
+order = 3
+
+[[exercise]]
+id = "integrity-1"
+hints = 2
+solution = ["PRAGMA integrity_check;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT 'ok'" },
+]

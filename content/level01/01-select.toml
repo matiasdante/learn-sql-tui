@@ -1,0 +1,25 @@
+id = "select"
+level = 1
+order = 1
+
+[[exercise]]
+id = "select-1"
+hints = 2
+solution = ["SELECT name, city FROM customers;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT name, city FROM customers" },
+]
+
+[[exercise]]
+id = "select-2"
+hints = 2
+solution = ["SELECT * FROM products;"]
+setup = [
+  { do = "seed", name = "shop" },
+]
+checks = [
+  { type = "last_result_same_as", sql = "SELECT * FROM products" },
+]
