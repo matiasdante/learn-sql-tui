@@ -1,6 +1,6 @@
 [package]
 name = "learn-sql-tui"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 description = "Learn SQL by practicing real SQL (embedded SQLite) inside a terminal UI"
 repository = "https://github.com/matiasdante/learn-sql-tui"
