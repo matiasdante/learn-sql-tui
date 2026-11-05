@@ -88,10 +88,10 @@ const STRINGS: &[(&str, &str, &str, &str)] = &[
     ("Free mode", "Modo libre", "Modo livre", "自由模式"),
     ("Achievements", "Logros", "Conquistas", "成就"),
     (
-        "↑/↓ move · Enter open · L: English/Español · Q quit",
-        "↑/↓ mover · Enter abrir · L: English/Español · Q salir",
-        "↑/↓ mover · Enter abrir · L: idioma · Q sair",
-        "↑/↓ 移动 · Enter 打开 · L：语言 · Q 退出",
+        "↑/↓ move · Enter open · L language · Q quit",
+        "↑/↓ mover · Enter abrir · L idioma · Q salir",
+        "↑/↓ mover · Enter abrir · L idioma · Q sair",
+        "↑/↓ 移动 · Enter 打开 · L 语言 · Q 退出",
     ),
     ("Coming soon.", "Próximamente.", "Em breve.", "敬请期待。"),
     (

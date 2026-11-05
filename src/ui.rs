@@ -103,7 +103,7 @@ fn splash_header(lang: Lang, width: u16, with_banner: bool) -> Vec<Line<'static>
     let mut lines = if with_banner {
         banner::lines(width)
     } else {
-        vec![Line::styled("SQL", accent_bold())]
+        vec![Line::styled("LEARN SQL", accent_bold())]
     };
     lines.push(Line::raw(""));
     lines.push(Line::styled(
@@ -323,10 +323,7 @@ fn draw_map(frame: &mut Frame, app: &App) {
     draw_help(
         frame,
         help,
-        tr(
-            app.lang,
-            "↑/↓ move · Enter open · L: English/Español · Q quit",
-        ),
+        tr(app.lang, "↑/↓ move · Enter open · L language · Q quit"),
     );
 }
 
