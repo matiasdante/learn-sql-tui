@@ -8,6 +8,13 @@
 
 **11 niveles, 61 lecciones y 90 ejercicios prácticos, en inglés, español, portugués y chino. Cada sentencia corre sobre un SQLite real embebido en el programa, dentro de un sandbox aislado.**
 
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-0078d4?style=flat-square)](#instalación)
+[![Rust](https://img.shields.io/badge/Rust-2024%20edition-dea584?style=flat-square&logo=rust&logoColor=white)](#requisitos)
+[![SQLite](https://img.shields.io/badge/SQLite-3.54%20embedded-003b57?style=flat-square&logo=sqlite&logoColor=white)](#cómo-funciona)
+[![Languages](https://img.shields.io/badge/languages-EN%20%C2%B7%20ES%20%C2%B7%20PT%20%C2%B7%20%E4%B8%AD%E6%96%87-5c4ee5?style=flat-square)](#idiomas)
+
+[Demo](#demo) · [Inicio rápido](#inicio-rápido) · [Cómo funciona](#cómo-funciona) · [Niveles](#niveles) · [Controles](#controles) · [Preguntas frecuentes](#preguntas-frecuentes) · [Desarrollo](#desarrollo)
+
 </div>
 
 > [!NOTE]
@@ -16,6 +23,10 @@
 ---
 
 Cada ejercicio te plantea una situación chica y una consola. Lo resolvés como quieras; al apretar `F5` se revisa el **estado de la base** (tablas, filas, índices, pragmas), no las sentencias que tipeaste, así que vale cualquier camino correcto. En los ejercicios de solo SELECT se compara tu último resultado con el de una consulta de referencia, y el orden solo cuenta cuando la consigna pide un `ORDER BY`. Si una verificación falla, la app explica qué falta y deja el sandbox como estaba al inicio del ejercicio.
+
+## Demo
+
+<p align="center"><img src="../media/demo.gif" alt="learn-sql-tui demo" width="800"></p>
 
 ## Inicio rápido
 
@@ -142,6 +153,22 @@ cargo fmt --check
 
 Las lecciones son archivos TOML en `content/levelNN/`, los scripts de datos compartidos están en `content/seeds/` y los textos en `content/i18n/<idioma>/`. El test de contenido arranca cada ejercicio, exige que el estado sin tocar falle las verificaciones y que la solución de referencia las pase.
 
+## Releases
+
+Un tag `v*` compila el `.exe` de Windows y un binario estático de Linux (musl) y publica los dos en Releases.
+
+```sh
+git tag -a v1.0.1 -m "v1.0.1"
+git push origin v1.0.1
+```
+
+## Límites conocidos
+
+- Fuera de alcance: otros motores (PostgreSQL, MySQL), un binario para macOS, mouse y actualizador automático. lazysql solo se recomienda; nunca se lanza.
+- La terminal necesita unas 100 columnas para las pantallas largas y las tablas de resultados anchas. El banner del título necesita al menos 70 columnas (y una ventana de al menos 30 filas en el mapa de niveles); si no entra, se muestra texto simple.
+- El naranja de acento es exacto (#ff8400) cuando la terminal informa truecolor (`COLORTERM`, o Windows Terminal); si no, usa el color 208 de la paleta de 256 colores.
+- El chino necesita una tipografía de terminal con caracteres CJK.
+
 ## Licencia
 
-Licencia MIT.
+[MIT](../../LICENSE). Cualquiera puede usar, copiar, modificar y distribuir este proyecto, gratis, siempre que conserve el aviso de copyright: **© 2026 Matias Dante Sarco**, creador de learn-sql-tui.

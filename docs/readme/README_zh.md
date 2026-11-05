@@ -8,6 +8,13 @@
 
 **11 个级别、61 节课、90 道实操练习，支持英语、西班牙语、葡萄牙语和中文。每条语句都运行在程序内置的真实 SQLite 上，处于隔离的沙盒中。**
 
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-0078d4?style=flat-square)](#安装)
+[![Rust](https://img.shields.io/badge/Rust-2024%20edition-dea584?style=flat-square&logo=rust&logoColor=white)](#环境要求)
+[![SQLite](https://img.shields.io/badge/SQLite-3.54%20embedded-003b57?style=flat-square&logo=sqlite&logoColor=white)](#工作原理)
+[![Languages](https://img.shields.io/badge/languages-EN%20%C2%B7%20ES%20%C2%B7%20PT%20%C2%B7%20%E4%B8%AD%E6%96%87-5c4ee5?style=flat-square)](#语言)
+
+[演示](#演示) · [快速开始](#快速开始) · [工作原理](#工作原理) · [级别](#级别) · [按键](#按键) · [常见问题](#常见问题) · [开发](#开发)
+
 </div>
 
 > [!NOTE]
@@ -16,6 +23,10 @@
 ---
 
 每道练习给你一个小场景和一个控制台。怎么解决都行；按 `F5` 时检查的是**数据库的状态**（表、行、索引、pragma），而不是你输入了哪些语句，所以任何正确的做法都算数。只用 SELECT 的练习会把你最后一次的查询结果与参考查询的结果比较，只有题目要求 `ORDER BY` 时顺序才有意义。如果检查失败，应用会说明缺少什么，并把沙盒恢复到练习开始时的状态。
+
+## 演示
+
+<p align="center"><img src="../media/demo.gif" alt="learn-sql-tui demo" width="800"></p>
 
 ## 快速开始
 
@@ -79,7 +90,7 @@ learn-sql-tui --version
 
 英语、西班牙语（`es`）、葡萄牙语（`pt`）和中文（`zh`）。在菜单中按 `L` 切换，选择会被保存。所有文本都在 `content/i18n/<语言>/` 中，任何语言缺少文本时测试都会失败。
 
-## 操作
+## 按键
 
 | 按键 | 作用 |
 | --- | --- |
@@ -142,6 +153,22 @@ cargo fmt --check
 
 课程是 `content/levelNN/` 中的 TOML 文件，共享的数据脚本在 `content/seeds/`，文本在 `content/i18n/<语言>/`。内容测试会启动每道练习，要求未改动的状态通不过检查，而参考解答能通过。
 
+## 发布
+
+推送 `v*` 标签后，会编译 Windows 的 `.exe` 和静态链接的 Linux（musl）程序，并把两者发布到 Releases。
+
+```sh
+git tag -a v1.0.1 -m "v1.0.1"
+git push origin v1.0.1
+```
+
+## 已知限制
+
+- 不在范围内：其他数据库引擎（PostgreSQL、MySQL）、macOS 程序、鼠标支持和自动更新。lazysql 只是推荐，从不启动。
+- 较长的界面和较宽的结果表格需要大约 100 列的终端。标题横幅至少需要 70 列（在级别地图上还需要至少 30 行高的窗口），放不下时会退回为普通文字。
+- 当终端声明支持真彩色（`COLORTERM`，或 Windows Terminal）时，橙色强调色是精确的 #ff8400；否则使用 256 色调色板中的 208 号颜色。
+- 中文需要终端字体支持 CJK 字符。
+
 ## 许可证
 
-MIT 许可证。
+[MIT](../../LICENSE)。任何人都可以免费使用、复制、修改和分发本项目，前提是保留版权声明：**© 2026 Matias Dante Sarco**，learn-sql-tui 的创作者。

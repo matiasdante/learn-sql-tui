@@ -8,6 +8,13 @@
 
 **11 levels, 61 lessons and 90 hands-on exercises, in English, Spanish, Portuguese and Chinese. Every statement runs on a real SQLite embedded in the program, inside an isolated sandbox.**
 
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-0078d4?style=flat-square)](#install)
+[![Rust](https://img.shields.io/badge/Rust-2024%20edition-dea584?style=flat-square&logo=rust&logoColor=white)](#requirements)
+[![SQLite](https://img.shields.io/badge/SQLite-3.54%20embedded-003b57?style=flat-square&logo=sqlite&logoColor=white)](#how-it-works)
+[![Languages](https://img.shields.io/badge/languages-EN%20%C2%B7%20ES%20%C2%B7%20PT%20%C2%B7%20%E4%B8%AD%E6%96%87-5c4ee5?style=flat-square)](#languages)
+
+[Showcase](#showcase) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Levels](#levels) · [Controls](#controls) · [FAQ](#faq) · [Development](#development)
+
 </div>
 
 > [!NOTE]
@@ -16,6 +23,10 @@
 ---
 
 Each exercise gives you a small situation and a console. You solve it however you like; pressing `F5` inspects the **state of the database** (tables, rows, indexes, pragmas), not the statements you typed, so every correct path counts. In SELECT-only exercises your last result is compared with the one of a reference query, and the order only matters when the exercise asks for an `ORDER BY`. If a check fails, the app explains what is missing and puts the sandbox back at the start of the exercise.
+
+## Showcase
+
+<p align="center"><img src="docs/media/demo.gif" alt="learn-sql-tui demo" width="800"></p>
 
 ## Quick start
 
@@ -142,6 +153,22 @@ cargo fmt --check
 
 Lessons are TOML files in `content/levelNN/`, shared data scripts in `content/seeds/`, and the texts in `content/i18n/<language>/`. The content test starts every exercise, requires that the untouched state fails the checks and that the reference solution passes them.
 
+## Releases
+
+A tag `v*` builds the Windows `.exe` and a static Linux (musl) binary and publishes both to Releases.
+
+```sh
+git tag -a v1.0.1 -m "v1.0.1"
+git push origin v1.0.1
+```
+
+## Known limits
+
+- Other engines (PostgreSQL, MySQL), a macOS binary, mouse support and an auto-updater are out of scope. lazysql is only recommended, never launched.
+- The terminal needs about 100 columns for the long screens and wide result tables. The title banner needs at least 70 columns (and a window at least 30 rows tall on the level map); otherwise it falls back to plain text.
+- The orange accent is exact (#ff8400) when the terminal reports truecolor (`COLORTERM`, or Windows Terminal); otherwise it uses color 208 of the 256-color palette.
+- Chinese needs a terminal font with CJK glyphs.
+
 ## License
 
-MIT license.
+[MIT](LICENSE). Anyone can use, copy, modify and distribute this project, for free, as long as the copyright notice is kept: **© 2026 Matias Dante Sarco**, creator of learn-sql-tui.
